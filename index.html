@@ -271,7 +271,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 document.getElementById(item.panel).classList.remove('active');
                 document.getElementById(item.btn).classList.remove('active');
             });
-            // Fixed typo: removed the broken raw .add() call that caused panels to disappear
             document.getElementById(t.panel).classList.add('active');
             this.classList.add('active');
         });
@@ -297,7 +296,7 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById(btnId).addEventListener('click', function() {
             const el = document.getElementById(sourceId);
             el.select();
-            el.setSelectionRange(0, 99999); // Mobile compatibility boundary
+            el.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(el.value).then(() => {
                 const nativeLabel = this.innerText;
                 this.innerText = "✓ Copied!";
@@ -311,7 +310,7 @@ document.addEventListener("DOMContentLoaded", function() {
             navigator.clipboard.readText().then(text => {
                 document.getElementById(targetId).value = text;
             }).catch(() => {
-                alert("Please grant clipboard reading permissions or paste manually via device tap.");
+                alert("Please grant clipboard reading permissions or paste manually.");
             });
         });
     }
@@ -340,12 +339,27 @@ document.addEventListener("DOMContentLoaded", function() {
         return bytes;
     }
 
+    // NEW: Safe Chunk-Based Random Byte Generator (Bypasses browser 64KB quota limit)
+    function generateSecureRandomBytes(totalSize) {
+        const outputBytes = new Uint8Array(totalSize);
+        const maxSafeChunk = 65536; // Browser API hard-limit boundary
+        
+        for (let offset = 0; offset < totalSize; offset += maxSafeChunk) {
+            const currentChunkSize = Math.min(maxSafeChunk, totalSize - offset);
+            const temporaryBuffer = new Uint8Array(currentChunkSize);
+            
+            window.crypto.getRandomValues(temporaryBuffer);
+            outputBytes.set(temporaryBuffer, offset);
+        }
+        return outputBytes;
+    }
+
     // High Performance Scramble Animation Engine
     function animateTextReveal(element, finalValue, isHex = false) {
         const matrixChars = isHex ? "0123456789abcdef" : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
         let currentFrame = 0;
         const totalFrames = 12; 
-        const sliceLimit = 250; // Protects against text overflow bottlenecks on mobile layouts
+        const sliceLimit = 250;
         
         const runtimeInterval = setInterval(() => {
             if (currentFrame >= totalFrames) {
@@ -379,7 +393,7 @@ document.addEventListener("DOMContentLoaded", function() {
             if (!text) return alert('Please enter text to encrypt.');
             
             const plainBytes = new TextEncoder().encode(text);
-            const keyBytes = window.crypto.getRandomValues(new Uint8Array(plainBytes.length));
+            const keyBytes = generateSecureRandomBytes(plainBytes.length); // Used safe chunker
             
             for (let i = 0; i < plainBytes.length; i++) plainBytes[i] ^= keyBytes[i];
 
@@ -396,7 +410,9 @@ document.addEventListener("DOMContentLoaded", function() {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const plainBytes = new Uint8Array(e.target.result);
-                const keyBytes = window.crypto.getRandomValues(new Uint8Array(plainBytes.length));
+                
+                // Fixed: Replaced raw call with chunked random data generation loop
+                const keyBytes = generateSecureRandomBytes(plainBytes.length);
                 
                 for (let i = 0; i < plainBytes.length; i++) plainBytes[i] ^= keyBytes[i];
 
@@ -417,7 +433,7 @@ document.addEventListener("DOMContentLoaded", function() {
         physicalAnchorNode.href = downloadUrl;
         physicalAnchorNode.download = fileNameString;
         
-        document.body.appendChild(physicalAnchorNode); // Mandatory execution parameter on Apple frameworks
+        document.body.appendChild(physicalAnchorNode);
         physicalAnchorNode.click();
         
         document.body.removeChild(physicalAnchorNode);
@@ -476,7 +492,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.getElementById('dlDecFile').addEventListener('click', () => { if(bDecFile) runSecureiOSDownload(bDecFile, nDecName); });
 
-    // 3. ENHANCED PASSWORD GENERATOR WITH COMPONENT FILTERS
+    // 3. ENHANCED PASSWORD GENERATOR
     document.getElementById('btnRunPwd').addEventListener('click', function() {
         const length = parseInt(document.getElementById('pwdLength').value) || 16;
         
