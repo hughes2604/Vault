@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absolute Privacy Suite</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            box-sizing: border-box;
+        }
+        /* Segmented Control / Sliding Menu */
+        .nav-toggle {
+            display: flex;
+            background: #e8e8ed;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 24px;
+        }
+        .nav-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #515154;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .nav-btn.active {
+            background: #ffffff;
+            color: #0071e3;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .panel {
+            display: none;
+        }
+        .panel.active {
+            display: block;
+        }
+        /* Component Styles */
+        .label {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 14px 0 6px 0;
+            display: block;
+            color: #1d1d1f;
+        }
+        textarea, input[type="text"], select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d2d2d7;
+            border-radius: 10px;
+            font-family: SFMono-Regular, Consolas, monospace;
+            font-size: 14px;
+            box-sizing: border-box;
+            background-color: #fafafa;
+        }
+        textarea { height: 80px; resize: vertical; }
+        textarea:focus, input:focus, select:focus {
+            outline: none; border-color: #0071e3; background-color: #fff;
+        }
+        .file-box {
+            border: 2px dashed #d2d2d7;
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+            background: #fafafa;
+            margin-bottom: 12px;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: background 0.2s;
+        }
+        .btn-main { background: #0071e3; color: white; }
+        .btn-main:active { background: #005bb5; }
+        .btn-download { background: #34c759; color: white; margin-top: 8px; }
+        .btn-download:active { background: #28a745; }
+        .download-zone {
+            background: #f2f2f7;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 16px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="nav-toggle">
+        <button class="nav-btn active" onclick="switchTab('encryptPanel', this)">Encrypt</button>
+        <button class="nav-btn" onclick="switchTab('decryptPanel', this)">Decrypt</button>
+        <button class="nav-btn" onclick="switchTab('pwdPanel', this)">PassGen</button>
+    </div>
+
+    <div id="encryptPanel" class="panel active">
+        <label class="label">Data Type</label>
+        <select id="encType" onchange="toggleInputMode('enc')">
+            <option value="text">Plain Text Message</option>
+            <option value="file">Raw File Binary</option>
+        </select>
+
+        <div id="encTextGroup">
+            <label class="label">Secret Message</label>
+            <textarea id="encText" placeholder="Type text to encrypt..."></textarea>
+        </div>
+
+        <div id="encFileGroup" style="display:none;">
+            <label class="label">Select Target File</label>
+            <div class="file-box"><input type="file" id="encFile"></div>
+        </div>
+
+        <button class="btn btn-main" onclick="handleEncrypt()">Run One-Time Pad Encryption</button>
+
+        <div id="encTextOutput" style="display:none;">
+            <label class="label">Generated Secret Key (Hex String - Share securely)</label>
+            <textarea id="encKeyResult" readonly></textarea>
+            <label class="label">Encrypted Output (Hex String)</label>
+            <textarea id="encCipherResult" readonly></textarea>
+        </div>
+
+        <div id="encFileOutput" class="download-zone">
+            <span class="label" style="margin:0 0 8px 0;">Encryption Complete! Download Files:</span>
+            <button id="dlEncFile" class="btn btn-download">Download Encrypted File</button>
+            <button id="dlEncKey" class="btn btn-download">Download Key File (.key)</button>
+        </div>
+    </div>
+
+    <div id="decryptPanel" class="panel">
+        <label class="label">Data Type</label>
+        <select id="decType" onchange="toggleInputMode('dec')">
+            <option value="text">Cipher Text (Hex String)</option>
+            <option value="file">Encrypted File Binary</option>
+        </select>
+
+        <div id="decTextGroup">
+            <label class="label">Encrypted Data (Hex String)</label>
+            <textarea id="decCipherInput" placeholder="Paste hex cipher here..."></textarea>
+            <label class="label">Secret Key (Hex String)</label>
+            <textarea id="decKeyInput" placeholder="Paste matching hex key here..."></textarea>
+        </div>
+
+        <div id="decFileGroup" style="display:none;">
+            <label class="label">Select Encrypted File</label>
+            <div class="file-box"><input type="file" id="decFile"></div>
+            <label class="label">Select Matching Key File (.key)</label>
+            <div class="file-box"><input type="file" id="decKeyFile"></div>
+        </div>
+
+        <button class="btn btn-main" onclick="handleDecrypt()">Run One-Time Pad Decryption</button>
+
+        <div id="decTextOutput" style="display:none;">
+            <label class="label">Decrypted Result (Plain Text)</label>
+            <textarea id="decPlainResult" readonly></textarea>
+        </div>
+
+        <div id="decFileOutput" class="download-zone">
+            <span class="label" style="margin:0 0 8px 0;">Decryption Complete!</span>
+            <button id="dlDecFile" class="btn btn-download">Download Restored File</button>
+        </div>
+    </div>
+
+    <div id="pwdPanel" class="panel">
+        <label class="label">Password Length</label>
+        <input type="number" id="pwdLength" value="16" min="8" max="64" style="width:100%; padding:12px; border-radius:10px; border:1px solid #d2d2d7;">
+
+        <button class="btn btn-main" onclick="generatePassword()">Generate Secure Password</button>
+
+        <label class="label">Generated Output</label>
+        <input type="text" id="pwdOutput" readonly placeholder="Secure key string will appear here...">
+    </div>
+</div>
+
+<script>
+    // Navigation Panel Switching Architecture
+    function switchTab(panelId, element) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(panelId).classList.add('active');
+        element.classList.add('active');
+    }
+
+    // Toggles between Text-field processing and File-system handling
+    function toggleInputMode(mode) {
+        const type = document.getElementById(mode + 'Type').value;
+        document.getElementById(mode + 'TextGroup').style.display = type === 'text' ? 'block' : 'none';
+        document.getElementById(mode + 'FileGroup').style.display = type === 'file' ? 'block' : 'none';
+        document.getElementById(mode + 'TextOutput').style.display = 'none';
+        document.getElementById(mode + 'FileOutput').style.display = 'none';
+    }
+
+    // Hexadecimal string conversion utilities
+    function bytesToHex(bytes) { return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(''); }
+    function hexToBytes(hex) {
+        let bytes = [];
+        for (let c = 0; c < hex.length; c += 2) bytes.push(parseInt(hex.substr(c, 2), 16));
+        return new Uint8Array(bytes);
+    }
+
+    // UI Configuration Helpers for Blob File Assembly
+    function setupDownloadButton(btnId, dataBytes, outputName) {
+        const btn = document.getElementById(btnId);
+        btn.onclick = () => {
+            const blob = new Blob([dataBytes], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = outputName;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+    }
+
+    // 1. ENCRYPTION LOGIC ENGINE
+    function handleEncrypt() {
+        const mode = document.getElementById('encType').value;
+        document.getElementById('encTextOutput').style.display = 'none';
+        document.getElementById('encFileOutput').style.display = 'none';
+
+        if (mode === 'text') {
+            const text = document.getElementById('encText').value;
+            if(!text) return alert('Enter text.');
+            const plainBytes = new TextEncoder().encode(text);
+            const keyBytes = window.crypto.getRandomValues(new Uint8Array(plainBytes.length));
+            
+            const cipherBytes = plainBytes.map((b, i) => b ^ keyBytes[i]);
+
+            document.getElementById('encKeyResult').value = bytesToHex(keyBytes);
+            document.getElementById('encCipherResult').value = bytesToHex(cipherBytes);
+            document.getElementById('encTextOutput').style.display = 'block';
+        } else {
+            const fileInput = document.getElementById('encFile').files[0];
+            if (!fileInput) return alert('Select a file.');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const plainBytes = new Uint8Array(e.target.result);
+                const keyBytes = window.crypto.getRandomValues(new Uint8Array(plainBytes.length));
+                const cipherBytes = plainBytes.map((b, i) => b ^ keyBytes[i]);
+
+                setupDownloadButton('dlEncFile', cipherBytes, fileInput.name + '.enc');
+                setupDownloadButton('dlEncKey', keyBytes, fileInput.name + '.key');
+                document.getElementById('encFileOutput').style.display = 'block';
+            };
+            reader.readAsArrayBuffer(fileInput);
+        }
+    }
+
+    // 2. DECRYPTION LOGIC ENGINE
+    function handleDecrypt() {
+        const mode = document.getElementById('decType').value;
+        document.getElementById('decTextOutput').style.display = 'none';
+        document.getElementById('decFileOutput').style.display = 'none';
+
+        if (mode === 'text') {
+            const cipherHex = document.getElementById('decCipherInput').value.trim();
+            const keyHex = document.getElementById('decKeyInput').value.trim();
+            if(!cipherHex || !keyHex) return alert('Fill fields.');
+
+            try {
+                const cipherBytes = hexToBytes(cipherHex);
+                const keyBytes = hexToBytes(keyHex);
+                const plainBytes = cipherBytes.map((b, i) => b ^ keyBytes[i]);
+
+                document.getElementById('decPlainResult').value = new TextDecoder().decode(plainBytes);
+                document.getElementById('decTextOutput').style.display = 'block';
+            } catch(e) { alert('Invalid Hex Strings.'); }
+        } else {
+            const fileInput = document.getElementById('decFile').files[0];
+            const keyInput = document.getElementById('decKeyFile').files[0];
+            if (!fileInput || !keyInput) return alert('Select both encrypted file and key file.');
+
+            const fileReader = new FileReader();
+            fileReader.onload = function(e) {
+                const cipherBytes = new Uint8Array(e.target.result);
+                const keyReader = new FileReader();
+                keyReader.onload = function(kEvent) {
+                    const keyBytes = new Uint8Array(kEvent.target.result);
+                    if (cipherBytes.length !== keyBytes.length) return alert('Key length mismatch.');
+
+                    const plainBytes = cipherBytes.map((b, i) => b ^ keyBytes[i]);
+                    const originalName = fileInput.name.replace('.enc', '');
+
+                    setupDownloadButton('dlDecFile', plainBytes, originalName);
+                    document.getElementById('decFileOutput').style.display = 'block';
+                };
+                keyReader.readAsArrayBuffer(keyInput);
+            };
+            fileReader.readAsArrayBuffer(fileInput);
+        }
+    }
+
+    // 3. CRYPTOGRAPHICALLY SECURE PASSWORD GENERATOR
+    function generatePassword() {
+        const length = parseInt(document.getElementById('pwdLength').value) || 16;
+        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
+        let password = "";
+        
+        // Secure byte allocation via system cryptographic hardware
+        const randomValues = new Uint32Array(length);
+        window.crypto.getRandomValues(randomValues);
+
+        for (let i = 0; i < length; i++) {
+            password += charset[randomValues[i] % charset.length];
+        }
+        document.getElementById('pwdOutput').value = password;
+    }
+</script>
+
+</body>
+</html>
