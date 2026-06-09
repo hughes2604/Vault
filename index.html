@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Absolute Privacy Suite</title>
+
+    <meta name="description" content="A secure, mathematical privacy tool for private messages. Mathematical encryption, absolute secrecy, zero data logs.">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://hughes2604.github.io/">
+    <meta property="og:title" content="Absolute Privacy Suite">
+    <meta property="og:description" content="Secure your private communications with mathematical, unbreakable encryption. Absolute secrecy with zero data footprints.">
+    <meta property="og:image" content="https://hughes2604.github.io/Absolute-Privacy-Suite-GitHub.io/og-image.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://hughes2604.github.io/">
+    <meta name="twitter:title" content="Absolute Privacy Suite">
+    <meta name="twitter:description" content="Secure your private communications with mathematical, unbreakable encryption. Absolute secrecy with zero data footprints.">
+    <meta name="twitter:image" content="https://hughes2604.github.io/Absolute-Privacy-Suite-GitHub.io/og-image.png">
+    
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -179,14 +194,14 @@
             <div class="file-box"><input type="file" id="encFile"></div>
         </div>
 
-        <button id="btnRunEncrypt" class="btn btn-main">Run One-Time Pad Encryption</button>
+        <button id="btnRunEncrypt" class="btn btn-main">Run Authenticated (AES-GCM) Encryption</button>
 
         <div id="encTextOutput" style="display:none;">
-            <label class="label">Generated Secret Key (Hex String)</label>
+            <label class="label">Generated Secret Key (Hex String, 256-bit)</label>
             <textarea id="encKeyResult" readonly></textarea>
             <div class="action-bar"><button class="action-btn" id="copyEncKey">Copy Key</button></div>
 
-            <label class="label">Encrypted Output (Hex String)</label>
+            <label class="label">Encrypted Output (Hex String, Authenticated)</label>
             <textarea id="encCipherResult" readonly></textarea>
             <div class="action-bar"><button class="action-btn" id="copyEncCipher">Copy Cipher Text</button></div>
         </div>
@@ -222,7 +237,7 @@
             <div class="file-box"><input type="file" id="decKeyFile"></div>
         </div>
 
-        <button id="btnRunDecrypt" class="btn btn-main">Run One-Time Pad Decryption</button>
+        <button id="btnRunDecrypt" class="btn btn-main">Run Authenticated Decryption</button>
 
         <div id="decTextOutput" style="display:none;">
             <label class="label">Decrypted Result (Plain Text)</label>
@@ -334,6 +349,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function hexToBytes(hex) {
+        if (!hex || hex.length % 2 !== 0) throw new Error("Invalid hex string structure.");
         let bytes = new Uint8Array(hex.length / 2);
         for (let c = 0; c < hex.length; c += 2) bytes[c / 2] = parseInt(hex.substring(c, c + 2), 16);
         return bytes;
@@ -382,47 +398,120 @@ document.addEventListener("DOMContentLoaded", function() {
     let bEncFile = null, bEncKey = null, bDecFile = null;
     let nEncName = "", nDecName = "";
 
-    // 1. ENCRYPTION HANDLER
-    document.getElementById('btnRunEncrypt').addEventListener('click', function() {
+    /* --- NATIVE WEBCRYPTO (AES-GCM) IMPLEMENTATION --- */
+    
+    // GCM handles authentication (tamper detection) natively via its internal tag.
+    // The safest method is to generate a unique key and unique nonce (IV) for *every* encryption.
+    // For text, we pack the nonce into the beginning of the hex output.
+
+    async function encryptData(plaintextBytes, keyBytes) {
+        // 1. Generate unique 96-bit (12-byte) nonce/IV for GCM. NATIVE REQUIREMENT.
+        const nonce = window.crypto.getRandomValues(new Uint8Array(12));
+
+        // 2. Import the raw keyBytes as a proper CryptoKey handle
+        const cryptoKey = await window.crypto.subtle.importKey(
+            "raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt"]
+        );
+
+        // 3. Perform encryption
+        const encryptedBuffer = await window.crypto.subtle.encrypt(
+            { name: "AES-GCM", iv: nonce },
+            cryptoKey,
+            plaintextBytes
+        );
+
+        // 4. Encrypted output includes the 16-byte authentication tag appended by the browser.
+        const encryptedBytes = new Uint8Array(encryptedBuffer);
+
+        // 5. Pack the nonce + encrypted data into one final binary buffer.
+        // This is necessary so the recipient only needs *one* ciphertext string (and the separate key).
+        const finalPackedData = new Uint8Array(nonce.length + encryptedBytes.length);
+        finalPackedData.set(nonce);
+        finalPackedData.set(encryptedBytes, nonce.length);
+
+        return finalPackedData;
+    }
+
+    async function decryptData(packedHex, keyBytes) {
+        const packedBytes = hexToBytes(packedHex);
+        
+        // GCM standard nonce length is 12. If the data is shorter than nonce + minimum possible 1-byte cipher, it's structurally tampered.
+        if (packedBytes.length < 13) throw new Error("Integrity failure: Ciphertext is malformed or truncated.");
+
+        // 1. Unpack data: Extract the first 12 bytes as the nonce
+        const nonce = packedBytes.slice(0, 12);
+        // The remaining bytes are the actual ciphertext-plus-authentication-tag
+        const encryptedData = packedBytes.slice(12);
+
+        // 2. Import key handle for decryption
+        const cryptoKey = await window.crypto.subtle.importKey(
+            "raw", keyBytes, { name: "AES-GCM" }, false, ["decrypt"]
+        );
+
+        // 3. Attempt Decryption. This is the tamper detection step.
+        // window.crypto.subtle.decrypt() will automatically check GCM's built-in authentication tag against the decrypted bytes and throw an exception if they don't match (i.e. if the data has been altered).
+        try {
+            const decryptedBuffer = await window.crypto.subtle.decrypt(
+                { name: "AES-GCM", iv: nonce },
+                cryptoKey,
+                encryptedData
+            );
+            return new Uint8Array(decryptedBuffer);
+        } catch(e) {
+            // Throw a explicit, fatal error if the browser reports a structural mismatch.
+            // This error must be handled in the main function.
+            throw new Error("🚨 SECURITY FATAL: The encrypted data has been modified! Decryption aborted due to loss of structural integrity.");
+        }
+    }
+
+    // 1. ENCRYPTION HANDLER (UPDATED FOR ASYNC CRYPTO)
+    document.getElementById('btnRunEncrypt').addEventListener('click', async function() {
         const mode = document.getElementById('encType').value;
         document.getElementById('encTextOutput').style.display = 'none';
         document.getElementById('encFileOutput').style.display = 'none';
 
-        if (mode === 'text') {
-            const text = document.getElementById('encText').value;
-            if (!text) return alert('Please enter text to encrypt.');
-            
-            const plainBytes = new TextEncoder().encode(text);
-            const keyBytes = generateSecureRandomBytes(plainBytes.length); // Used safe chunker
-            
-            for (let i = 0; i < plainBytes.length; i++) plainBytes[i] ^= keyBytes[i];
-
-            const hexKey = bytesToHex(keyBytes);
-            const hexCipher = bytesToHex(plainBytes);
-
-            document.getElementById('encTextOutput').style.display = 'block';
-            animateTextReveal(document.getElementById('encKeyResult'), hexKey, true);
-            animateTextReveal(document.getElementById('encCipherResult'), hexCipher, true);
-        } else {
-            const fileInput = document.getElementById('encFile').files[0];
-            if (!fileInput) return alert('Please choose a file to encrypt.');
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const plainBytes = new Uint8Array(e.target.result);
+        try {
+            if (mode === 'text') {
+                const text = document.getElementById('encText').value;
+                if (!text) return alert('Please enter text to encrypt.');
                 
-                // Fixed: Replaced raw call with chunked random data generation loop
-                const keyBytes = generateSecureRandomBytes(plainBytes.length);
+                const plainBytes = new TextEncoder().encode(text);
+                // For optimal security, we generate a random 256-bit (32-byte) key for every text message.
+                const keyBytes = generateSecureRandomBytes(32); 
                 
-                for (let i = 0; i < plainBytes.length; i++) plainBytes[i] ^= keyBytes[i];
+                // Pack the data (includes nonce, ciphertext, and GCM auth tag)
+                const finalPackedData = await encryptData(plainBytes, keyBytes);
 
-                bEncFile = new Blob([plainBytes], { type: 'application/octet-stream' });
-                bEncKey = new Blob([keyBytes], { type: 'application/octet-stream' });
-                nEncName = fileInput.name;
+                const hexKey = bytesToHex(keyBytes);
+                const hexCipher = bytesToHex(finalPackedData);
 
-                document.getElementById('encFileOutput').style.display = 'block';
-            };
-            reader.readAsArrayBuffer(fileInput);
+                document.getElementById('encTextOutput').style.display = 'block';
+                animateTextReveal(document.getElementById('encKeyResult'), hexKey, true);
+                animateTextReveal(document.getElementById('encCipherResult'), hexCipher, true);
+            } else {
+                // FILE MODE (Retains memory limits; refactored for async crypto)
+                const fileInput = document.getElementById('encFile').files[0];
+                if (!fileInput) return alert('Please choose a file to encrypt.');
+
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const plainBytes = new Uint8Array(e.target.result);
+                    const keyBytes = generateSecureRandomBytes(32); // Generate unique file key
+
+                    const finalPackedData = await encryptData(plainBytes, keyBytes);
+
+                    // For files, we keep Key and Cipher separate (Key goes in .key file, data goes in .enc file)
+                    // The .enc file structure is: [12 bytes: NONCE] [N bytes: CIPHERTEXT+GCMTAG]
+                    bEncFile = new Blob([finalPackedData], { type: 'application/octet-stream' });
+                    bEncKey = new Blob([keyBytes], { type: 'application/octet-stream' });
+                    nEncName = fileInput.name;
+
+                    document.getElementById('encFileOutput').style.display = 'block';
+                };
+                reader.readAsArrayBuffer(fileInput);
+            }
+        } catch(e) {
+            alert('An internal error occurred during encryption: ' + e.message);
         }
     });
 
@@ -443,46 +532,68 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('dlEncFile').addEventListener('click', () => { if(bEncFile) runSecureiOSDownload(bEncFile, nEncName + '.enc'); });
     document.getElementById('dlEncKey').addEventListener('click', () => { if(bEncKey) runSecureiOSDownload(bEncKey, nEncName + '.key'); });
 
-    // 2. DECRYPT HANDLER
-    document.getElementById('btnRunDecrypt').addEventListener('click', function() {
+    // 2. DECRYPT HANDLER (UPDATED FOR ASYNC CRYPTO AND TAMPER DETECTION)
+    document.getElementById('btnRunDecrypt').addEventListener('click', async function() {
         const mode = document.getElementById('decType').value;
         document.getElementById('decTextOutput').style.display = 'none';
         document.getElementById('decFileOutput').style.display = 'none';
 
         if (mode === 'text') {
-            const cipherHex = document.getElementById('decCipherInput').value.trim();
+            const packedHex = document.getElementById('decCipherInput').value.trim();
             const keyHex = document.getElementById('decKeyInput').value.trim();
-            if (!cipherHex || !keyHex) return alert('Please enter both cipher and key strings.');
+            if (!packedHex || !keyHex) return alert('Please enter both packed cipher and key strings.');
 
             try {
-                const cipherBytes = hexToBytes(cipherHex);
                 const keyBytes = hexToBytes(keyHex);
-                
-                for (let i = 0; i < cipherBytes.length; i++) cipherBytes[i] ^= keyBytes[i];
+                // Attempt authenticated decryption. This is where tamper detection happens.
+                const decryptedBytes = await decryptData(packedHex, keyBytes);
 
-                const plainString = new TextDecoder().decode(cipherBytes);
+                const plainString = new TextDecoder().decode(decryptedBytes);
                 document.getElementById('decTextOutput').style.display = 'block';
                 animateTextReveal(document.getElementById('decPlainResult'), plainString, false);
-            } catch(e) { alert('Decryption structurally failed. Check key coherence.'); }
+            } catch(e) { 
+                // CRITICAL TAMPER ALERT: Check the specific error message generated inside decryptData()
+                if (e.message.includes('🚨 SECURITY FATAL')) {
+                    // This means the integrity check failed (data was altered). 
+                    // Tell the user explicitly that it has been tampered with.
+                    alert(e.message); 
+                } else {
+                    // This handles structural failures (e.g., inputting junk hex or the wrong key, which can look like corruption).
+                    alert('Decryption structurally failed. Check key coherence and input strings.\n\nError: ' + e.message);
+                }
+                console.error(e);
+            }
         } else {
+            // FILE MODE (Retains memory limits; refactored for async crypto and tamper detection)
             const fileInput = document.getElementById('decFile').files[0];
             const keyInput = document.getElementById('decKeyFile').files[0];
             if (!fileInput || !keyInput) return alert('Please load both file targets.');
 
             const fileReader = new FileReader();
             fileReader.onload = function(e) {
-                const cipherBytes = new Uint8Array(e.target.result);
+                const packedFileBytes = new Uint8Array(e.target.result);
+                const packedHex = bytesToHex(packedFileBytes);
+                
                 const keyReader = new FileReader();
-                keyReader.onload = function(kEvent) {
+                keyReader.onload = async function(kEvent) {
                     const keyBytes = new Uint8Array(kEvent.target.result);
-                    if (cipherBytes.length !== keyBytes.length) return alert('Key length calculation mismatch.');
 
-                    for (let i = 0; i < cipherBytes.length; i++) cipherBytes[i] ^= keyBytes[i];
+                    try {
+                        // Tamper detection step for files
+                        const decryptedBytes = await decryptData(packedHex, keyBytes);
 
-                    bDecFile = new Blob([cipherBytes], { type: 'application/octet-stream' });
-                    nDecName = fileInput.name.replace('.enc', '');
+                        bDecFile = new Blob([decryptedBytes], { type: 'application/octet-stream' });
+                        nDecName = fileInput.name.replace('.enc', '');
 
-                    document.getElementById('decFileOutput').style.display = 'block';
+                        document.getElementById('decFileOutput').style.display = 'block';
+                    } catch(tamperErr) {
+                        if (tamperErr.message.includes('🚨 SECURITY FATAL')) {
+                            alert(tamperErr.message); 
+                        } else {
+                            alert('Decryption structurally failed. Verify you have loaded the correct, original .enc and .key files. Memory limits might also be a factor.\n\nError: ' + tamperErr.message);
+                        }
+                        console.error(tamperErr);
+                    }
                 };
                 keyReader.readAsArrayBuffer(keyInput);
             };
@@ -492,7 +603,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.getElementById('dlDecFile').addEventListener('click', () => { if(bDecFile) runSecureiOSDownload(bDecFile, nDecName); });
 
-    // 3. ENHANCED PASSWORD GENERATOR
+    // 3. ENHANCED PASSWORD GENERATOR (unchanged, mathematically robust)
     document.getElementById('btnRunPwd').addEventListener('click', function() {
         const length = parseInt(document.getElementById('pwdLength').value) || 16;
         
