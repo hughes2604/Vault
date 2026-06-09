@@ -271,7 +271,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 document.getElementById(item.panel).classList.remove('active');
                 document.getElementById(item.btn).classList.remove('active');
             });
-            document.getElementById(t.panel).add('active');
+            // Fixed typo: removed the broken raw .add() call that caused panels to disappear
             document.getElementById(t.panel).classList.add('active');
             this.classList.add('active');
         });
@@ -410,7 +410,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // Robust Document Object Model Appended Download Anchors (Bypasses iOS Sandbox Restrictions)
+    // Document Object Model Appended Download Anchors (Bypasses iOS Sandbox Restrictions)
     function runSecureiOSDownload(blobData, fileNameString) {
         const downloadUrl = URL.createObjectURL(blobData);
         const physicalAnchorNode = document.createElement('a');
@@ -427,7 +427,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('dlEncFile').addEventListener('click', () => { if(bEncFile) runSecureiOSDownload(bEncFile, nEncName + '.enc'); });
     document.getElementById('dlEncKey').addEventListener('click', () => { if(bEncKey) runSecureiOSDownload(bEncKey, nEncName + '.key'); });
 
-    // 2. DECRYPTION HANDLER
+    // 2. DECRYPT HANDLER
     document.getElementById('btnRunDecrypt').addEventListener('click', function() {
         const mode = document.getElementById('decType').value;
         document.getElementById('decTextOutput').style.display = 'none';
