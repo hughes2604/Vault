@@ -4,18 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Absolute Privacy Suite</title>
-    <meta name="description" content="AES-256-GCM encryption running entirely in your browser. Zero network calls. Zero dependencies.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://hughes2604.github.io/">
-    <meta property="og:title" content="Absolute Privacy Suite">
-    <meta property="og:description" content="AES-256-GCM encryption. Zero network calls. Runs entirely in your browser.">
-    <meta property="og:image" content="https://hughes2604.github.io/Absolute-Privacy-Suite-GitHub.io/og-image.png">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://hughes2604.github.io/">
-    <meta name="twitter:title" content="Absolute Privacy Suite">
-    <meta name="twitter:description" content="AES-256-GCM encryption. Zero network calls. Runs entirely in your browser.">
-    <meta name="twitter:image" content="https://hughes2604.github.io/Absolute-Privacy-Suite-GitHub.io/og-image.png">
-    <!-- Fonts as <link> so they load before paint; graceful fallback when offline -->
+    <meta name="description" content="Local tools. No data leaves your device.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -37,11 +26,7 @@
             --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
 
-        /* Force dark bg everywhere including iOS overscroll bounce area */
-        html, body {
-            background: var(--bg);
-            min-height: 100%;
-        }
+        html, body { background: var(--bg); min-height: 100%; }
         body {
             font-family: var(--sans);
             color: var(--text);
@@ -53,13 +38,11 @@
             -webkit-text-size-adjust: 100%;
         }
 
-        /* ── Header ─────────────────────────────── */
-        header {
-            width: 100%;
-            max-width: 500px;
-            padding: 28px 0 24px;
-            text-align: center;
-        }
+        /* ── Page router ── */
+        .page { display: none; width: 100%; max-width: 500px; flex-direction: column; align-items: center; }
+        .page.active { display: flex; }
+
+        /* ── Wordmark / back link shared ── */
         .wordmark {
             font-family: var(--mono);
             font-size: 10px;
@@ -67,61 +50,46 @@
             letter-spacing: 0.28em;
             text-transform: uppercase;
             color: var(--accent);
-            margin-bottom: 14px;
             display: block;
+            text-align: center;
         }
-        .hero-title {
-            font-family: var(--sans);
-            font-size: 28px;
-            font-weight: 700;
-            color: #e2eaf3;      /* hardcoded fallback in case var() fails on old WebKit */
-            color: var(--text-hi);
-            letter-spacing: -0.5px;
-            line-height: 1.15;
-            margin-bottom: 10px;
-        }
-        .hero-sub {
-            font-size: 13.5px;
-            color: #505968;
-            color: var(--muted);
-            line-height: 1.65;
-        }
-        .badge-row {
-            display: flex;
-            gap: 7px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 16px;
-        }
-        .badge {
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
             font-family: var(--mono);
-            font-size: 9.5px;
+            font-size: 10.5px;
             font-weight: 500;
-            letter-spacing: 0.06em;
-            padding: 4px 9px;
-            border-radius: 5px;
-            border: 1px solid var(--border-hi);
+            letter-spacing: 0.08em;
             color: var(--muted);
-            background: var(--surface);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            text-transform: uppercase;
+            transition: color 0.15s;
+            -webkit-tap-highlight-color: transparent;
+            text-decoration: none;
         }
+        .back-link:hover { color: var(--text); }
+        .back-link::before { content: '←'; font-size: 11px; }
 
-        /* ── Card ───────────────────────────────── */
+        /* ── Shared card ── */
         .card {
             width: 100%;
-            max-width: 500px;
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 18px;
             overflow: hidden;
         }
 
-        /* ── Tab strip ──────────────────────────── */
+        /* ── Shared tab strip ── */
         .tab-strip {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
             border-bottom: 1px solid var(--border);
             background: var(--surface2);
         }
+        .tab-strip.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
         .tab-btn {
             background: none;
             border: none;
@@ -141,11 +109,11 @@
             background: var(--surface);
         }
 
-        /* ── Panels ─────────────────────────────── */
+        /* ── Panels ── */
         .panel { display: none; padding: 22px; }
         .panel.active { display: block; }
 
-        /* ── Field labels ───────────────────────── */
+        /* ── Fields ── */
         .field { margin-bottom: 14px; }
         .fl {
             display: block;
@@ -157,7 +125,7 @@
             margin-bottom: 6px;
         }
 
-        /* ── Inputs / textareas / selects ───────── */
+        /* ── Inputs / textareas / selects ── */
         textarea,
         input[type="text"],
         input[type="number"],
@@ -169,6 +137,7 @@
             border-radius: 8px;
             font-family: var(--mono);
             font-size: 13px;
+            color: #e2eaf3;
             color: var(--text-hi);
             outline: none;
             transition: border-color 0.15s, box-shadow 0.15s;
@@ -181,9 +150,6 @@
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(0,229,160,0.08);
         }
-        input[type="number"] { font-family: var(--mono); }
-
-        /* Custom select arrow */
         select {
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%23505968'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
@@ -192,9 +158,7 @@
             cursor: pointer;
             color: var(--text);
         }
-        select option { background: #1a1f27; color: var(--text-hi); }
-
-        /* ── Output textareas (readonly) ─────────── */
+        select option { background: #1a1f27; color: #e2eaf3; }
         textarea[readonly], input[readonly] {
             color: var(--accent);
             border-color: var(--border);
@@ -203,7 +167,7 @@
             font-size: 12px;
         }
 
-        /* ── File drop zone ─────────────────────── */
+        /* ── File zone ── */
         .file-zone {
             border: 1px dashed var(--border-hi);
             border-radius: 8px;
@@ -215,23 +179,19 @@
             position: relative;
             overflow: hidden;
         }
-        .file-zone:hover { border-color: var(--accent); background: rgba(0,229,160,0.03); }
+        .file-zone:hover,
+        .file-zone.has-file { border-color: var(--accent); background: rgba(0,229,160,0.03); }
         .file-zone input[type="file"] {
             position: absolute; inset: 0; opacity: 0;
             cursor: pointer; width: 100%; height: 100%;
             border: none; background: none; padding: 0;
         }
         .fz-icon { font-size: 22px; display: block; margin-bottom: 5px; }
-        .fz-label { font-size: 12px; color: var(--muted); font-family: var(--sans); }
-        .fz-name { font-size: 11px; color: var(--accent); margin-top: 4px; font-family: var(--mono); display: none; }
+        .fz-label { font-size: 12px; color: var(--muted); font-family: var(--sans); display: block; }
+        .fz-meta { font-size: 11px; color: var(--accent); margin-top: 4px; font-family: var(--mono); display: none; }
 
-        /* ── Small utility buttons (Copy / Paste / Clear) */
-        .strip {
-            display: flex;
-            gap: 6px;
-            margin-top: 6px;
-            flex-wrap: wrap;
-        }
+        /* ── Utility strip buttons ── */
+        .strip { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
         .ub {
             background: none;
             border: 1px solid var(--border-hi);
@@ -246,10 +206,10 @@
             -webkit-tap-highlight-color: transparent;
             letter-spacing: 0.03em;
         }
-        .ub:hover { color: var(--text-hi); border-color: var(--text); }
+        .ub:hover { color: #e2eaf3; border-color: var(--text); }
         .ub.copied { color: var(--accent); border-color: var(--accent); }
 
-        /* ── Primary action button ───────────────── */
+        /* ── Primary button ── */
         .run-btn {
             width: 100%;
             padding: 14px;
@@ -263,19 +223,15 @@
             font-weight: 700;
             cursor: pointer;
             letter-spacing: 0.02em;
-            transition: background 0.15s, transform 0.08s;
+            transition: background 0.15s, transform 0.08s, opacity 0.15s;
             -webkit-tap-highlight-color: transparent;
         }
-        .run-btn:hover { background: var(--accent-hi); }
-        .run-btn:active { transform: scale(0.985); }
+        .run-btn:hover:not(:disabled) { background: var(--accent-hi); }
+        .run-btn:active:not(:disabled) { transform: scale(0.985); }
+        .run-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-        /* ── Output section ─────────────────────── */
-        .out-section {
-            margin-top: 18px;
-            padding-top: 18px;
-            border-top: 1px solid var(--border);
-            display: none;
-        }
+        /* ── Output section ── */
+        .out-section { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); display: none; }
         .out-section.show { display: block; }
         .out-label {
             display: block;
@@ -286,10 +242,8 @@
             color: var(--muted);
             margin-bottom: 5px;
         }
-        .out-label + textarea,
-        .out-label + input { margin-bottom: 4px; }
 
-        /* ── Success / download zone ─────────────── */
+        /* ── Download zone ── */
         .dl-zone {
             margin-top: 18px;
             background: rgba(0,229,160,0.05);
@@ -341,13 +295,8 @@
         .dl-btn:hover { border-color: var(--accent); color: var(--accent); }
         .dl-icon { font-size: 15px; flex-shrink: 0; }
 
-        /* ── Password panel ──────────────────────── */
-        .char-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 7px;
-            margin-bottom: 14px;
-        }
+        /* ── Password extras ── */
+        .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 14px; }
         .char-item {
             display: flex;
             align-items: center;
@@ -368,41 +317,136 @@
             width: 14px; height: 14px;
             border: none; background: none; padding: 0;
             accent-color: var(--accent);
-            cursor: pointer;
-            flex-shrink: 0;
+            cursor: pointer; flex-shrink: 0;
         }
-        .strength-row {
+        .strength-row { display: flex; align-items: center; gap: 8px; margin: 10px 0 2px; min-height: 18px; }
+        .strength-bar { flex: 1; height: 3px; background: var(--border-hi); border-radius: 3px; overflow: hidden; }
+        .strength-fill { height: 100%; border-radius: 3px; transition: width 0.3s, background 0.3s; width: 0%; }
+        .strength-label { font-family: var(--mono); font-size: 10px; color: var(--muted); min-width: 48px; text-align: right; }
+
+        /* ── Conversion option cards ── */
+        .conv-grid { display: grid; gap: 7px; margin-top: 14px; }
+        .conv-opt {
             display: flex;
-            align-items: center;
-            gap: 8px;
-            margin: 10px 0 2px;
-            min-height: 18px;
+            flex-direction: column;
+            gap: 2px;
+            padding: 12px 14px;
+            background: var(--bg);
+            border: 1px solid var(--border-hi);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: border-color 0.12s, background 0.12s;
+            -webkit-tap-highlight-color: transparent;
+            text-align: left;
+            width: 100%;
+            font-family: var(--sans);
         }
-        .strength-bar {
-            flex: 1;
-            height: 3px;
-            background: var(--border-hi);
-            border-radius: 3px;
-            overflow: hidden;
+        .conv-opt:hover { border-color: var(--border-hi); background: var(--surface2); }
+        .conv-opt.selected { border-color: var(--accent); background: rgba(0,229,160,0.05); }
+        .conv-opt-title { font-size: 13px; font-weight: 600; color: #e2eaf3; color: var(--text-hi); }
+        .conv-opt-desc  { font-size: 11.5px; color: var(--muted); }
+        .conv-none { font-size: 13px; color: var(--muted); font-style: italic; padding: 8px 0; }
+
+        /* ── "Convert another" link ── */
+        .reset-link {
+            background: none; border: none; cursor: pointer;
+            font-family: var(--mono); font-size: 10.5px; font-weight: 500;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--muted); transition: color 0.15s; padding: 0; margin-top: 10px;
+            -webkit-tap-highlight-color: transparent;
         }
-        .strength-fill {
-            height: 100%;
-            border-radius: 3px;
-            transition: width 0.3s, background 0.3s;
-            width: 0%;
-            background: var(--muted);
+        .reset-link:hover { color: var(--text); }
+
+        /* ── ── ── ── HOME PAGE ── ── ── ── */
+        .home-header {
+            width: 100%;
+            padding: 40px 0 32px;
+            text-align: center;
         }
-        .strength-label {
-            font-family: var(--mono);
-            font-size: 10px;
+        .home-title {
+            font-family: var(--sans);
+            font-size: 26px;
+            font-weight: 700;
+            color: #e2eaf3;
+            color: var(--text-hi);
+            letter-spacing: -0.4px;
+            line-height: 1.2;
+            margin: 14px 0 8px;
+        }
+        .home-sub {
+            font-size: 13px;
+            color: #505968;
             color: var(--muted);
-            min-width: 48px;
-            text-align: right;
+            line-height: 1.65;
+        }
+        .home-cta {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 22px;
+            letter-spacing: 0.04em;
+            font-family: var(--mono);
+            text-transform: uppercase;
+        }
+        .tool-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .tool-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 18px;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+            text-align: left;
+            font-family: var(--sans);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .tool-card:hover { border-color: var(--border-hi); background: var(--surface2); }
+        .tool-card-icon { font-size: 22px; margin-bottom: 10px; display: block; }
+        .tool-card-title { font-size: 14px; font-weight: 700; color: #e2eaf3; color: var(--text-hi); margin-bottom: 4px; }
+        .tool-card-desc  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+        .tool-card.soon { opacity: 0.45; cursor: default; }
+        .tool-card.soon .tool-card-title::after {
+            content: ' · soon';
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--muted);
+            font-family: var(--mono);
+            letter-spacing: 0.06em;
         }
 
-        /* ── Footer ──────────────────────────────── */
+        /* ── Page headers (inner pages) ── */
+        .page-header {
+            width: 100%;
+            padding: 20px 0 20px;
+        }
+        .page-header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+        .page-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #e2eaf3;
+            color: var(--text-hi);
+            letter-spacing: -0.3px;
+        }
+        .page-sub {
+            font-size: 12.5px;
+            color: var(--muted);
+            line-height: 1.6;
+            margin-top: 2px;
+        }
+
+        /* ── Footer ── */
         footer {
-            margin-top: 30px;
+            margin-top: 32px;
             font-family: var(--mono);
             font-size: 10px;
             color: var(--muted);
@@ -411,7 +455,6 @@
             opacity: 0.6;
         }
 
-        /* ── Scrollbar ───────────────────────────── */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
@@ -423,431 +466,815 @@
 </head>
 <body>
 
-<header>
-    <span class="wordmark">Absolute Privacy Suite</span>
-    <h1 class="hero-title">Your data.<br>No one else's.</h1>
-    <p class="hero-sub">AES-256-GCM encryption running entirely in your browser.<br>Zero network calls. Zero dependencies. Zero compromise.</p>
-    <div class="badge-row">
-        <span class="badge">AES-256-GCM</span>
-        <span class="badge">WebCrypto API</span>
-        <span class="badge">100% Local</span>
-        <span class="badge">Tamper Detection</span>
-    </div>
-</header>
-
-<div class="card">
-    <div class="tab-strip">
-        <button id="tabEnc" class="tab-btn active">Encrypt</button>
-        <button id="tabDec" class="tab-btn">Decrypt</button>
-        <button id="tabPwd" class="tab-btn">PassGen</button>
+<!-- ══════════════════════════════════════════
+     PAGE: HOME
+══════════════════════════════════════════ -->
+<div id="pageHome" class="page active">
+    <div class="home-header">
+        <span class="wordmark">Absolute Privacy Suite</span>
+        <h1 class="home-title">Local tools.<br>No data leaves your device.</h1>
+        <p class="home-sub">Everything runs in your browser. Nothing is sent anywhere.</p>
     </div>
 
-    <!-- ── ENCRYPT ── -->
-    <div id="encryptPanel" class="panel active">
-        <div class="field">
-            <label class="fl" for="encType">Mode</label>
-            <select id="encType">
-                <option value="text">Text message</option>
-                <option value="file">File</option>
-            </select>
-        </div>
-
-        <div id="encTextGroup">
-            <div class="field">
-                <label class="fl" for="encText">Plaintext</label>
-                <textarea id="encText" placeholder="Enter the message to encrypt…"></textarea>
-                <div class="strip">
-                    <button class="ub" id="pasteEncText">Paste</button>
-                    <button class="ub" id="clearEncText">Clear</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="encFileGroup" style="display:none;">
-            <div class="field">
-                <label class="fl">File</label>
-                <div class="file-zone" id="encFileZone">
-                    <span class="fz-icon">🔒</span>
-                    <span class="fz-label">Tap to select a file</span>
-                    <span class="fz-name" id="encFileName"></span>
-                    <input type="file" id="encFile">
-                </div>
-            </div>
-        </div>
-
-        <button id="btnRunEncrypt" class="run-btn">Encrypt</button>
-
-        <div id="encTextOutput" class="out-section">
-            <span class="out-label">Secret Key — keep this separate from the ciphertext</span>
-            <textarea id="encKeyResult" readonly></textarea>
-            <div class="strip"><button class="ub" id="copyEncKey">Copy key</button></div>
-
-            <span class="out-label" style="margin-top:14px; display:block;">Ciphertext</span>
-            <textarea id="encCipherResult" readonly></textarea>
-            <div class="strip"><button class="ub" id="copyEncCipher">Copy ciphertext</button></div>
-        </div>
-
-        <div id="encFileOutput" class="dl-zone">
-            <div class="dl-zone-title">Encryption complete</div>
-            <button id="dlEncFile" class="dl-btn"><span class="dl-icon">⬇</span>Download encrypted file (.enc)</button>
-            <button id="dlEncKey"  class="dl-btn"><span class="dl-icon">🔑</span>Download key file (.key)</button>
-        </div>
+    <p class="home-cta">Select a tool to begin</p>
+    <div class="tool-grid">
+        <button class="tool-card" onclick="nav('pageEnc')">
+            <span class="tool-card-icon">🔒</span>
+            <div class="tool-card-title">Encryption</div>
+            <p class="tool-card-desc">AES-256-GCM text and file encryption with password generation.</p>
+        </button>
+        <button class="tool-card" onclick="nav('pageConv')">
+            <span class="tool-card-icon">🔄</span>
+            <div class="tool-card-title">File Converter</div>
+            <p class="tool-card-desc">Convert images and audio locally. Format options adapt to your file.</p>
+        </button>
+        <button class="tool-card soon" disabled>
+            <span class="tool-card-icon">🗑</span>
+            <div class="tool-card-title">Secure Erase</div>
+            <p class="tool-card-desc">Overwrite sensitive data before deletion.</p>
+        </button>
+        <button class="tool-card soon" disabled>
+            <span class="tool-card-icon">🔍</span>
+            <div class="tool-card-title">Hash Checker</div>
+            <p class="tool-card-desc">Verify file integrity with SHA-256 and SHA-512.</p>
+        </button>
     </div>
 
-    <!-- ── DECRYPT ── -->
-    <div id="decryptPanel" class="panel">
-        <div class="field">
-            <label class="fl" for="decType">Mode</label>
-            <select id="decType">
-                <option value="text">Hex ciphertext</option>
-                <option value="file">File (.enc + .key)</option>
-            </select>
-        </div>
-
-        <div id="decTextGroup">
-            <div class="field">
-                <label class="fl" for="decCipherInput">Ciphertext (hex)</label>
-                <textarea id="decCipherInput" placeholder="Paste the encrypted hex string…"></textarea>
-                <div class="strip"><button class="ub" id="pasteDecCipher">Paste</button></div>
-            </div>
-            <div class="field">
-                <label class="fl" for="decKeyInput">Secret Key (hex)</label>
-                <textarea id="decKeyInput" placeholder="Paste the matching key hex string…"></textarea>
-                <div class="strip"><button class="ub" id="pasteDecKey">Paste</button></div>
-            </div>
-        </div>
-
-        <div id="decFileGroup" style="display:none;">
-            <div class="field">
-                <label class="fl">Encrypted file (.enc)</label>
-                <div class="file-zone">
-                    <span class="fz-icon">🔒</span>
-                    <span class="fz-label">Tap to select .enc file</span>
-                    <input type="file" id="decFile">
-                </div>
-            </div>
-            <div class="field">
-                <label class="fl">Key file (.key)</label>
-                <div class="file-zone">
-                    <span class="fz-icon">🔑</span>
-                    <span class="fz-label">Tap to select .key file</span>
-                    <input type="file" id="decKeyFile">
-                </div>
-            </div>
-        </div>
-
-        <button id="btnRunDecrypt" class="run-btn">Decrypt</button>
-
-        <div id="decTextOutput" class="out-section">
-            <span class="out-label">Decrypted message</span>
-            <textarea id="decPlainResult" readonly></textarea>
-            <div class="strip"><button class="ub" id="copyDecPlain">Copy</button></div>
-        </div>
-
-        <div id="decFileOutput" class="dl-zone">
-            <div class="dl-zone-title">Decryption complete</div>
-            <button id="dlDecFile" class="dl-btn"><span class="dl-icon">⬇</span>Download restored file</button>
-        </div>
-    </div>
-
-    <!-- ── PASSGEN ── -->
-    <div id="pwdPanel" class="panel">
-        <div class="field">
-            <label class="fl" for="pwdLength">Length</label>
-            <input type="number" id="pwdLength" value="20" min="6" max="128">
-        </div>
-
-        <div class="field">
-            <label class="fl">Character sets</label>
-            <div class="char-grid">
-                <label class="char-item"><input type="checkbox" id="chkUpper" checked> A–Z uppercase</label>
-                <label class="char-item"><input type="checkbox" id="chkLower" checked> a–z lowercase</label>
-                <label class="char-item"><input type="checkbox" id="chkNum" checked> 0–9 digits</label>
-                <label class="char-item"><input type="checkbox" id="chkSym" checked> !@#$ symbols</label>
-            </div>
-        </div>
-
-        <button id="btnRunPwd" class="run-btn">Generate password</button>
-
-        <div id="pwdOutputZone" class="out-section">
-            <span class="out-label">Generated password</span>
-            <input type="text" id="pwdOutput" readonly placeholder="Password will appear here…">
-            <div class="strength-row">
-                <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
-                <span class="strength-label" id="strengthLabel"></span>
-            </div>
-            <div class="strip"><button class="ub" id="copyPwd">Copy</button></div>
-        </div>
-    </div>
+    <footer>
+        AES-256-GCM &nbsp;·&nbsp; WebCrypto API &nbsp;·&nbsp; No network requests &nbsp;·&nbsp; No data logged<br>
+        For maximum security, save this file and run it completely offline.
+    </footer>
 </div>
 
-<footer>
-    AES-256-GCM &nbsp;·&nbsp; WebCrypto API &nbsp;·&nbsp; No network requests &nbsp;·&nbsp; No data logged<br>
-    For maximum security, save this file and run it completely offline.
-</footer>
+<!-- ══════════════════════════════════════════
+     PAGE: ENCRYPTION
+══════════════════════════════════════════ -->
+<div id="pageEnc" class="page">
+    <div class="page-header">
+        <div class="page-header-top">
+            <button class="back-link" onclick="nav('pageHome')">Home</button>
+            <span class="wordmark" style="letter-spacing:0.18em;">Absolute Privacy Suite</span>
+        </div>
+        <h1 class="page-title">Encryption</h1>
+        <p class="page-sub">AES-256-GCM · runs entirely in your browser</p>
+    </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
+    <div class="card">
+        <div class="tab-strip cols-3">
+            <button id="tabEnc" class="tab-btn active" onclick="switchTab('enc')">Encrypt</button>
+            <button id="tabDec" class="tab-btn"        onclick="switchTab('dec')">Decrypt</button>
+            <button id="tabPwd" class="tab-btn"        onclick="switchTab('pwd')">PassGen</button>
+        </div>
 
-    // ── Tabs ───────────────────────────────────────
-    const TABS = [
-        { btn: 'tabEnc', panel: 'encryptPanel' },
-        { btn: 'tabDec', panel: 'decryptPanel' },
-        { btn: 'tabPwd', panel: 'pwdPanel' },
-    ];
-    TABS.forEach(t => {
-        document.getElementById(t.btn).addEventListener('click', function () {
-            TABS.forEach(i => {
-                document.getElementById(i.panel).classList.remove('active');
-                document.getElementById(i.btn).classList.remove('active');
-            });
-            document.getElementById(t.panel).classList.add('active');
-            this.classList.add('active');
-        });
+        <!-- ENCRYPT -->
+        <div id="panelEnc" class="panel active">
+            <div class="field">
+                <label class="fl" for="encType">Mode</label>
+                <select id="encType" onchange="toggleEncMode()">
+                    <option value="text">Text message</option>
+                    <option value="file">File</option>
+                </select>
+            </div>
+
+            <div id="encTextGroup">
+                <div class="field">
+                    <label class="fl" for="encText">Plaintext</label>
+                    <textarea id="encText" placeholder="Enter the message to encrypt…"></textarea>
+                    <div class="strip">
+                        <button class="ub" onclick="pasteInto('encText')">Paste</button>
+                        <button class="ub" onclick="document.getElementById('encText').value=''">Clear</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="encFileGroup" style="display:none;">
+                <div class="field">
+                    <label class="fl">File</label>
+                    <div class="file-zone" id="encFileZone">
+                        <span class="fz-icon">🔒</span>
+                        <span class="fz-label">Tap to select a file</span>
+                        <span class="fz-meta" id="encFileName"></span>
+                        <input type="file" id="encFile" onchange="showFileMeta('encFile','encFileName','encFileZone')">
+                    </div>
+                </div>
+            </div>
+
+            <button id="btnEncrypt" class="run-btn" onclick="runEncrypt()">Encrypt</button>
+
+            <div id="encTextOutput" class="out-section">
+                <span class="out-label">Secret Key — keep this separate from the ciphertext</span>
+                <textarea id="encKeyResult" readonly></textarea>
+                <div class="strip"><button class="ub" onclick="copyFrom('encKeyResult',this)">Copy key</button></div>
+                <span class="out-label" style="margin-top:14px;display:block;">Ciphertext</span>
+                <textarea id="encCipherResult" readonly></textarea>
+                <div class="strip"><button class="ub" onclick="copyFrom('encCipherResult',this)">Copy ciphertext</button></div>
+            </div>
+
+            <div id="encFileOutput" class="dl-zone">
+                <div class="dl-zone-title">Encryption complete</div>
+                <button class="dl-btn" onclick="dlBlob('bEncFile','nEncName','.enc')"><span class="dl-icon">⬇</span>Download encrypted file (.enc)</button>
+                <button class="dl-btn" onclick="dlBlob('bEncKey', 'nEncName','.key')"><span class="dl-icon">🔑</span>Download key file (.key)</button>
+            </div>
+        </div>
+
+        <!-- DECRYPT -->
+        <div id="panelDec" class="panel">
+            <div class="field">
+                <label class="fl" for="decType">Mode</label>
+                <select id="decType" onchange="toggleDecMode()">
+                    <option value="text">Hex ciphertext</option>
+                    <option value="file">File (.enc + .key)</option>
+                </select>
+            </div>
+
+            <div id="decTextGroup">
+                <div class="field">
+                    <label class="fl" for="decCipherInput">Ciphertext (hex)</label>
+                    <textarea id="decCipherInput" placeholder="Paste the encrypted hex string…"></textarea>
+                    <div class="strip"><button class="ub" onclick="pasteInto('decCipherInput')">Paste</button></div>
+                </div>
+                <div class="field">
+                    <label class="fl" for="decKeyInput">Secret Key (hex)</label>
+                    <textarea id="decKeyInput" placeholder="Paste the matching key hex string…"></textarea>
+                    <div class="strip"><button class="ub" onclick="pasteInto('decKeyInput')">Paste</button></div>
+                </div>
+            </div>
+
+            <div id="decFileGroup" style="display:none;">
+                <div class="field">
+                    <label class="fl">Encrypted file (.enc)</label>
+                    <div class="file-zone">
+                        <span class="fz-icon">🔒</span>
+                        <span class="fz-label">Tap to select .enc file</span>
+                        <input type="file" id="decFile">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="fl">Key file (.key)</label>
+                    <div class="file-zone">
+                        <span class="fz-icon">🔑</span>
+                        <span class="fz-label">Tap to select .key file</span>
+                        <input type="file" id="decKeyFile">
+                    </div>
+                </div>
+            </div>
+
+            <button class="run-btn" onclick="runDecrypt()">Decrypt</button>
+
+            <div id="decTextOutput" class="out-section">
+                <span class="out-label">Decrypted message</span>
+                <textarea id="decPlainResult" readonly></textarea>
+                <div class="strip"><button class="ub" onclick="copyFrom('decPlainResult',this)">Copy</button></div>
+            </div>
+
+            <div id="decFileOutput" class="dl-zone">
+                <div class="dl-zone-title">Decryption complete</div>
+                <button class="dl-btn" onclick="dlBlob('bDecFile','nDecName','')"><span class="dl-icon">⬇</span>Download restored file</button>
+            </div>
+        </div>
+
+        <!-- PASSGEN -->
+        <div id="panelPwd" class="panel">
+            <div class="field">
+                <label class="fl" for="pwdLength">Length</label>
+                <input type="number" id="pwdLength" value="20" min="6" max="128">
+            </div>
+            <div class="field">
+                <label class="fl">Character sets</label>
+                <div class="char-grid">
+                    <label class="char-item"><input type="checkbox" id="chkUpper" checked> A–Z uppercase</label>
+                    <label class="char-item"><input type="checkbox" id="chkLower" checked> a–z lowercase</label>
+                    <label class="char-item"><input type="checkbox" id="chkNum"   checked> 0–9 digits</label>
+                    <label class="char-item"><input type="checkbox" id="chkSym"   checked> !@#$ symbols</label>
+                </div>
+            </div>
+            <button class="run-btn" onclick="runPwd()">Generate password</button>
+            <div id="pwdOutputZone" class="out-section">
+                <span class="out-label">Generated password</span>
+                <input type="text" id="pwdOutput" readonly placeholder="Password will appear here…">
+                <div class="strength-row">
+                    <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                    <span class="strength-label" id="strengthLabel"></span>
+                </div>
+                <div class="strip"><button class="ub" onclick="copyFrom('pwdOutput',this)">Copy</button></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        AES-256-GCM &nbsp;·&nbsp; WebCrypto API &nbsp;·&nbsp; No network requests &nbsp;·&nbsp; No data logged
+    </footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: FILE CONVERTER
+══════════════════════════════════════════ -->
+<div id="pageConv" class="page">
+    <div class="page-header">
+        <div class="page-header-top">
+            <button class="back-link" onclick="nav('pageHome')">Home</button>
+            <span class="wordmark" style="letter-spacing:0.18em;">Absolute Privacy Suite</span>
+        </div>
+        <h1 class="page-title">File Converter</h1>
+        <p class="page-sub">Convert files locally. Nothing is uploaded.</p>
+    </div>
+
+    <div class="card">
+        <div class="panel active" style="display:block;">
+
+            <!-- Upload -->
+            <div class="field">
+                <label class="fl">File</label>
+                <div class="file-zone" id="convFileZone">
+                    <span class="fz-icon">📂</span>
+                    <span class="fz-label" id="convZoneLabel">Tap to select a file</span>
+                    <span class="fz-meta" id="convFileMeta"></span>
+                    <input type="file" id="convFile" onchange="onConvFileChange()"
+                        accept="video/mp4,video/quicktime,video/webm,video/x-matroska,video/x-msvideo,audio/mpeg,audio/wav,audio/ogg,audio/aac,audio/flac,image/png,image/jpeg,image/webp,image/gif,image/bmp,image/tiff,.mp4,.mov,.webm,.mkv,.avi,.mp3,.wav,.ogg,.aac,.flac,.png,.jpg,.jpeg,.webp,.gif,.bmp,.tiff">
+                </div>
+            </div>
+
+            <!-- Status / progress line -->
+            <p id="convStatus" style="display:none; font-family:var(--mono); font-size:11px; color:var(--accent); margin-top:2px; margin-bottom:4px; letter-spacing:0.04em;"></p>
+
+            <!-- Dynamic conversion options -->
+            <div id="convOptionsWrap" style="display:none;">
+                <label class="fl">Available Conversions</label>
+                <div class="conv-grid" id="convGrid"></div>
+            </div>
+
+            <!-- Convert button -->
+            <button id="btnConvert" class="run-btn" onclick="runConvert()" style="display:none;" disabled>Convert</button>
+
+            <!-- Output -->
+            <div id="convOutput" class="dl-zone">
+                <div class="dl-zone-title">Conversion complete</div>
+                <button class="dl-btn" id="dlConvFile"><span class="dl-icon">⬇</span><span id="dlConvLabel">Download file</span></button>
+                <button class="reset-link" onclick="resetConv()">Convert another file</button>
+            </div>
+
+            <!-- Unsupported -->
+            <div id="convUnsupported" style="display:none; margin-top:14px;">
+                <p class="conv-none">No conversions available for this file type.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        All conversions run in your browser &nbsp;·&nbsp; No data is uploaded
+    </footer>
+</div>
+
+<script type="module">
+/* ════════════════════════════════════════
+   ROUTER
+════════════════════════════════════════ */
+function nav(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    window.scrollTo(0, 0);
+}
+
+/* ════════════════════════════════════════
+   SHARED UTILS
+════════════════════════════════════════ */
+function show(id) { const el = document.getElementById(id); if(el) el.classList.add('show'); }
+function hide(id) { const el = document.getElementById(id); if(el) el.classList.remove('show'); }
+
+function copyFrom(srcId, btn) {
+    const val = document.getElementById(srcId).value;
+    navigator.clipboard.writeText(val).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copied'; btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1500);
     });
+}
+function pasteInto(tgtId) {
+    navigator.clipboard.readText().then(t => document.getElementById(tgtId).value = t)
+        .catch(() => alert('Grant clipboard access or paste manually (Ctrl+V / ⌘V).'));
+}
+function showFileMeta(inputId, metaId, zoneId) {
+    const f = document.getElementById(inputId).files[0];
+    if (!f) return;
+    const el = document.getElementById(metaId);
+    el.textContent = f.name + ' · ' + fmtSize(f.size);
+    el.style.display = 'block';
+    document.getElementById(zoneId).classList.add('has-file');
+}
+function fmtSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/(1024*1024)).toFixed(2) + ' MB';
+}
+function bytesToHex(b) { return Array.from(b).map(x => x.toString(16).padStart(2,'0')).join(''); }
+function hexToBytes(h) {
+    if (!h || h.length%2) throw new Error('Invalid hex string.');
+    return new Uint8Array(h.length/2).map((_,i) => parseInt(h.slice(i*2,i*2+2),16));
+}
+function secureRandom(n) {
+    const out = new Uint8Array(n), chunk = 65536;
+    for (let o=0; o<n; o+=chunk) { const b=new Uint8Array(Math.min(chunk,n-o)); window.crypto.getRandomValues(b); out.set(b,o); }
+    return out;
+}
+function scramble(el, final, isHex=false) {
+    const chars = isHex ? '0123456789abcdef' : 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let frame=0; const FRAMES=10, LIMIT=220;
+    const iv = setInterval(() => {
+        if (frame++ >= FRAMES) { el.value=final; clearInterval(iv); return; }
+        const len = Math.min(final.length, LIMIT);
+        let buf = Array.from({length:len}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+        if (final.length>LIMIT) buf += '\n… [full output ready]';
+        el.value = buf;
+    }, 32);
+}
 
-    // ── Mode toggles ────────────────────────────────
-    document.getElementById('encType').addEventListener('change', function () {
-        document.getElementById('encTextGroup').style.display  = this.value === 'text' ? '' : 'none';
-        document.getElementById('encFileGroup').style.display  = this.value === 'file' ? '' : 'none';
-        hide('encTextOutput'); hide('encFileOutput');
+// Blob store (keyed by name for inline onclick use)
+const blobs = {};
+function storeBlob(key, blob) { blobs[key] = blob; }
+function dlBlob(blobKey, nameKey, suffix) {
+    const b = blobs[blobKey]; const n = blobs[nameKey];
+    if (!b || !n) return;
+    const url = URL.createObjectURL(b);
+    const a = Object.assign(document.createElement('a'), {href:url, download: n+suffix});
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 300);
+}
+
+/* ════════════════════════════════════════
+   ENCRYPTION TABS
+════════════════════════════════════════ */
+function switchTab(t) {
+    ['Enc','Dec','Pwd'].forEach(k => {
+        document.getElementById('tab'+k).classList.remove('active');
+        document.getElementById('panel'+k).classList.remove('active');
     });
-    document.getElementById('decType').addEventListener('change', function () {
-        document.getElementById('decTextGroup').style.display  = this.value === 'text' ? '' : 'none';
-        document.getElementById('decFileGroup').style.display  = this.value === 'file' ? '' : 'none';
-        hide('decTextOutput'); hide('decFileOutput');
-    });
+    const map = {enc:'Enc', dec:'Dec', pwd:'Pwd'};
+    document.getElementById('tab'+map[t]).classList.add('active');
+    document.getElementById('panel'+map[t]).classList.add('active');
+}
+function toggleEncMode() {
+    const v = document.getElementById('encType').value;
+    document.getElementById('encTextGroup').style.display = v==='text' ? '' : 'none';
+    document.getElementById('encFileGroup').style.display = v==='file' ? '' : 'none';
+    hide('encTextOutput'); hide('encFileOutput');
+}
+function toggleDecMode() {
+    const v = document.getElementById('decType').value;
+    document.getElementById('decTextGroup').style.display = v==='text' ? '' : 'none';
+    document.getElementById('decFileGroup').style.display = v==='file' ? '' : 'none';
+    hide('decTextOutput'); hide('decFileOutput');
+}
 
-    function show(id) { document.getElementById(id).classList.add('show');    }
-    function hide(id) { document.getElementById(id).classList.remove('show'); }
+/* ── AES-GCM ── */
+async function aesEncrypt(plain, key) {
+    const nonce = window.crypto.getRandomValues(new Uint8Array(12));
+    const ck = await window.crypto.subtle.importKey('raw', key, {name:'AES-GCM'}, false, ['encrypt']);
+    const ct = await window.crypto.subtle.encrypt({name:'AES-GCM', iv:nonce}, ck, plain);
+    const out = new Uint8Array(12+ct.byteLength); out.set(nonce); out.set(new Uint8Array(ct),12);
+    return out;
+}
+async function aesDecrypt(hex, key) {
+    const packed = hexToBytes(hex);
+    if (packed.length < 13) throw new Error('Ciphertext is malformed or truncated.');
+    const nonce = packed.slice(0,12), ct = packed.slice(12);
+    const ck = await window.crypto.subtle.importKey('raw', key, {name:'AES-GCM'}, false, ['decrypt']);
+    try {
+        return new Uint8Array(await window.crypto.subtle.decrypt({name:'AES-GCM', iv:nonce}, ck, ct));
+    } catch { throw new Error('🚨 SECURITY ALERT: Integrity check failed. Data has been altered or the wrong key was used.'); }
+}
 
-    // ── File label feedback ─────────────────────────
-    document.getElementById('encFile').addEventListener('change', function () {
-        const el = document.getElementById('encFileName');
-        if (this.files[0]) { el.textContent = this.files[0].name; el.style.display = 'block'; }
-    });
-
-    // ── Clipboard ───────────────────────────────────
-    function setupCopy(btnId, srcId) {
-        document.getElementById(btnId).addEventListener('click', function () {
-            const el = document.getElementById(srcId);
-            navigator.clipboard.writeText(el.value).then(() => {
-                this.textContent = '✓ Copied';
-                this.classList.add('copied');
-                setTimeout(() => {
-                    this.textContent = btnId === 'copyPwd' ? 'Copy' : (btnId === 'copyEncKey' ? 'Copy key' : btnId === 'copyEncCipher' ? 'Copy ciphertext' : 'Copy');
-                    this.classList.remove('copied');
-                }, 1500);
-            });
-        });
-    }
-    function setupPaste(btnId, tgtId) {
-        document.getElementById(btnId).addEventListener('click', function () {
-            navigator.clipboard.readText().then(t => {
-                document.getElementById(tgtId).value = t;
-            }).catch(() => alert('Grant clipboard access or paste manually (Ctrl+V / ⌘V).'));
-        });
-    }
-
-    setupCopy('copyEncKey',    'encKeyResult');
-    setupCopy('copyEncCipher', 'encCipherResult');
-    setupCopy('copyDecPlain',  'decPlainResult');
-    setupCopy('copyPwd',       'pwdOutput');
-
-    setupPaste('pasteEncText',   'encText');
-    setupPaste('pasteDecCipher', 'decCipherInput');
-    setupPaste('pasteDecKey',    'decKeyInput');
-
-    document.getElementById('clearEncText').addEventListener('click', () => {
-        document.getElementById('encText').value = '';
-    });
-
-    // ── Conversion utils ────────────────────────────
-    function bytesToHex(b) {
-        return Array.from(b).map(x => x.toString(16).padStart(2, '0')).join('');
-    }
-    function hexToBytes(h) {
-        if (!h || h.length % 2) throw new Error('Invalid hex string.');
-        return new Uint8Array(h.length / 2).map((_, i) => parseInt(h.slice(i*2, i*2+2), 16));
-    }
-
-    // ── Secure random (chunk-based, bypasses 64 KB limit) ──
-    function secureRandom(n) {
-        const out = new Uint8Array(n), chunk = 65536;
-        for (let o = 0; o < n; o += chunk) {
-            const b = new Uint8Array(Math.min(chunk, n - o));
-            window.crypto.getRandomValues(b);
-            out.set(b, o);
-        }
-        return out;
-    }
-
-    // ── Matrix scramble animation ───────────────────
-    function scramble(el, final, isHex = false) {
-        const chars = isHex ? '0123456789abcdef' : 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-        let frame = 0;
-        const FRAMES = 10, LIMIT = 220;
-        const iv = setInterval(() => {
-            if (frame++ >= FRAMES) { el.value = final; clearInterval(iv); return; }
-            const len = Math.min(final.length, LIMIT);
-            let buf = Array.from({length: len}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-            if (final.length > LIMIT) buf += '\n… [full output ready]';
-            el.value = buf;
-        }, 32);
-    }
-
-    // ── Blob store ──────────────────────────────────
-    let bEncFile = null, bEncKey = null, bDecFile = null;
-    let nEncName = '', nDecName = '';
-
-    // ── AES-GCM core ────────────────────────────────
-    async function aesEncrypt(plain, key) {
-        const nonce = window.crypto.getRandomValues(new Uint8Array(12));
-        const ck = await window.crypto.subtle.importKey('raw', key, {name:'AES-GCM'}, false, ['encrypt']);
-        const ct = await window.crypto.subtle.encrypt({name:'AES-GCM', iv: nonce}, ck, plain);
-        const out = new Uint8Array(12 + ct.byteLength);
-        out.set(nonce);
-        out.set(new Uint8Array(ct), 12);
-        return out;
-    }
-
-    async function aesDecrypt(hex, key) {
-        const packed = hexToBytes(hex);
-        if (packed.length < 13) throw new Error('Ciphertext is malformed or truncated.');
-        const nonce = packed.slice(0, 12);
-        const ct    = packed.slice(12);
-        const ck = await window.crypto.subtle.importKey('raw', key, {name:'AES-GCM'}, false, ['decrypt']);
-        try {
-            const pt = await window.crypto.subtle.decrypt({name:'AES-GCM', iv: nonce}, ck, ct);
-            return new Uint8Array(pt);
-        } catch {
-            throw new Error('🚨 SECURITY ALERT: Integrity check failed. The encrypted data has been altered or the wrong key was used.');
-        }
-    }
-
-    // ── iOS-safe download ───────────────────────────
-    function download(blob, name) {
-        const url = URL.createObjectURL(blob);
-        const a = Object.assign(document.createElement('a'), {href: url, download: name});
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 300);
-    }
-
-    // ── Encrypt handler ─────────────────────────────
-    document.getElementById('btnRunEncrypt').addEventListener('click', async function () {
-        const mode = document.getElementById('encType').value;
-        hide('encTextOutput'); hide('encFileOutput');
-        try {
-            if (mode === 'text') {
-                const txt = document.getElementById('encText').value;
-                if (!txt) return alert('Enter some text to encrypt.');
-                const key    = secureRandom(32);
-                const packed = await aesEncrypt(new TextEncoder().encode(txt), key);
-                show('encTextOutput');
-                scramble(document.getElementById('encKeyResult'),    bytesToHex(key),    true);
-                scramble(document.getElementById('encCipherResult'), bytesToHex(packed), true);
-            } else {
-                const f = document.getElementById('encFile').files[0];
-                if (!f) return alert('Select a file to encrypt.');
-                const reader = new FileReader();
-                reader.onload = async e => {
-                    const key    = secureRandom(32);
-                    const packed = await aesEncrypt(new Uint8Array(e.target.result), key);
-                    bEncFile = new Blob([packed], {type:'application/octet-stream'});
-                    bEncKey  = new Blob([key],    {type:'application/octet-stream'});
-                    nEncName = f.name;
-                    show('encFileOutput');
-                };
-                reader.readAsArrayBuffer(f);
-            }
-        } catch (e) { alert('Encryption error: ' + e.message); }
-    });
-
-    document.getElementById('dlEncFile').addEventListener('click', () => { if (bEncFile) download(bEncFile, nEncName + '.enc'); });
-    document.getElementById('dlEncKey') .addEventListener('click', () => { if (bEncKey)  download(bEncKey,  nEncName + '.key'); });
-
-    // ── Decrypt handler ─────────────────────────────
-    document.getElementById('btnRunDecrypt').addEventListener('click', async function () {
-        const mode = document.getElementById('decType').value;
-        hide('decTextOutput'); hide('decFileOutput');
-        if (mode === 'text') {
-            const hex    = document.getElementById('decCipherInput').value.trim();
-            const keyHex = document.getElementById('decKeyInput').value.trim();
-            if (!hex || !keyHex) return alert('Paste both the ciphertext and the key.');
-            try {
-                const pt = await aesDecrypt(hex, hexToBytes(keyHex));
-                show('decTextOutput');
-                scramble(document.getElementById('decPlainResult'), new TextDecoder().decode(pt), false);
-            } catch (e) {
-                alert(e.message);
-            }
+async function runEncrypt() {
+    const mode = document.getElementById('encType').value;
+    hide('encTextOutput'); hide('encFileOutput');
+    try {
+        if (mode==='text') {
+            const txt = document.getElementById('encText').value;
+            if (!txt) return alert('Enter some text to encrypt.');
+            const key = secureRandom(32);
+            const packed = await aesEncrypt(new TextEncoder().encode(txt), key);
+            show('encTextOutput');
+            scramble(document.getElementById('encKeyResult'),    bytesToHex(key),    true);
+            scramble(document.getElementById('encCipherResult'), bytesToHex(packed), true);
         } else {
-            const fEnc = document.getElementById('decFile').files[0];
-            const fKey = document.getElementById('decKeyFile').files[0];
-            if (!fEnc || !fKey) return alert('Load both the .enc file and the .key file.');
-            const r1 = new FileReader();
-            r1.onload = e1 => {
-                const r2 = new FileReader();
-                r2.onload = async e2 => {
-                    try {
-                        const pt = await aesDecrypt(bytesToHex(new Uint8Array(e1.target.result)), new Uint8Array(e2.target.result));
-                        bDecFile = new Blob([pt], {type:'application/octet-stream'});
-                        nDecName = fEnc.name.replace(/\.enc$/i, '');
-                        show('decFileOutput');
-                    } catch (e) { alert(e.message); }
-                };
-                r2.readAsArrayBuffer(fKey);
+            const f = document.getElementById('encFile').files[0];
+            if (!f) return alert('Select a file to encrypt.');
+            const r = new FileReader();
+            r.onload = async e => {
+                const key = secureRandom(32);
+                const packed = await aesEncrypt(new Uint8Array(e.target.result), key);
+                storeBlob('bEncFile', new Blob([packed],{type:'application/octet-stream'}));
+                storeBlob('bEncKey',  new Blob([key],  {type:'application/octet-stream'}));
+                storeBlob('nEncName', f.name);
+                show('encFileOutput');
             };
-            r1.readAsArrayBuffer(fEnc);
+            r.readAsArrayBuffer(f);
         }
+    } catch(e) { alert('Encryption error: '+e.message); }
+}
+
+async function runDecrypt() {
+    const mode = document.getElementById('decType').value;
+    hide('decTextOutput'); hide('decFileOutput');
+    if (mode==='text') {
+        const hex    = document.getElementById('decCipherInput').value.trim();
+        const keyHex = document.getElementById('decKeyInput').value.trim();
+        if (!hex||!keyHex) return alert('Paste both the ciphertext and the key.');
+        try {
+            const pt = await aesDecrypt(hex, hexToBytes(keyHex));
+            show('decTextOutput');
+            scramble(document.getElementById('decPlainResult'), new TextDecoder().decode(pt), false);
+        } catch(e) { alert(e.message); }
+    } else {
+        const fEnc = document.getElementById('decFile').files[0];
+        const fKey = document.getElementById('decKeyFile').files[0];
+        if (!fEnc||!fKey) return alert('Load both the .enc file and the .key file.');
+        const r1 = new FileReader();
+        r1.onload = e1 => {
+            const r2 = new FileReader();
+            r2.onload = async e2 => {
+                try {
+                    const pt = await aesDecrypt(bytesToHex(new Uint8Array(e1.target.result)), new Uint8Array(e2.target.result));
+                    storeBlob('bDecFile', new Blob([pt],{type:'application/octet-stream'}));
+                    storeBlob('nDecName', fEnc.name.replace(/\.enc$/i,''));
+                    show('decFileOutput');
+                } catch(e) { alert(e.message); }
+            };
+            r2.readAsArrayBuffer(fKey);
+        };
+        r1.readAsArrayBuffer(fEnc);
+    }
+}
+
+function runPwd() {
+    const length = Math.min(128, Math.max(6, parseInt(document.getElementById('pwdLength').value)||20));
+    let pool = '';
+    if (document.getElementById('chkUpper').checked) pool += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    if (document.getElementById('chkLower').checked) pool += 'abcdefghijklmnopqrstuvwxyz';
+    if (document.getElementById('chkNum').checked)   pool += '0123456789';
+    if (document.getElementById('chkSym').checked)   pool += '!@#$%^&*()-_=+[{]};:,.<>/?';
+    if (!pool) return alert('Select at least one character set.');
+    const maxUsable = Math.floor(0x100000000/pool.length)*pool.length;
+    let pwd='', buf=new Uint32Array(length*3), bi=0;
+    window.crypto.getRandomValues(buf);
+    while (pwd.length < length) {
+        if (bi>=buf.length) { window.crypto.getRandomValues(buf); bi=0; }
+        if (buf[bi]<maxUsable) pwd += pool[buf[bi]%pool.length];
+        bi++;
+    }
+    show('pwdOutputZone');
+    scramble(document.getElementById('pwdOutput'), pwd, false);
+    // Strength
+    const bits = Math.round(pwd.length*Math.log2(pool.length));
+    const fill=document.getElementById('strengthFill'), label=document.getElementById('strengthLabel');
+    const tiers=[{b:40,p:15,c:'#ff4d4d',t:'Weak'},{b:60,p:35,c:'#ff9f0a',t:'Fair'},{b:80,p:60,c:'#ffd60a',t:'Good'},{b:100,p:80,c:'#30d158',t:'Strong'},{b:Infinity,p:100,c:'#00e5a0',t:'Max'}];
+    const tier = tiers.find(t2=>bits<t2.b);
+    fill.style.width=tier.p+'%'; fill.style.background=tier.c;
+    label.textContent=tier.t+' · '+bits+' bits'; label.style.color=tier.c;
+}
+
+/* ════════════════════════════════════════
+   FILE CONVERTER
+   Images  → Canvas API (no deps)
+   Audio   → Web Audio + WAV encoder (no deps)
+   Video   → FFmpeg.wasm (loaded on first use)
+════════════════════════════════════════ */
+
+// MIME → conversion options
+// engine: 'canvas' | 'audio' | 'ffmpeg'
+const CONV_MAP = {
+    /* ── Images ── */
+    'image/png': [
+        {ext:'jpg',  mime:'image/jpeg', label:'Convert to JPEG', desc:'Smaller file, lossy compression',          engine:'canvas'},
+        {ext:'webp', mime:'image/webp', label:'Convert to WebP', desc:'Modern format, excellent compression',     engine:'canvas'},
+        {ext:'gif',  mime:'image/gif',  label:'Convert to GIF',  desc:'Indexed colour output',                    engine:'canvas'},
+    ],
+    'image/jpeg': [
+        {ext:'png',  mime:'image/png',  label:'Convert to PNG',  desc:'Lossless, transparency support',           engine:'canvas'},
+        {ext:'webp', mime:'image/webp', label:'Convert to WebP', desc:'Modern format, better quality per byte',   engine:'canvas'},
+        {ext:'gif',  mime:'image/gif',  label:'Convert to GIF',  desc:'Indexed colour output',                    engine:'canvas'},
+    ],
+    'image/webp': [
+        {ext:'png',  mime:'image/png',  label:'Convert to PNG',  desc:'Lossless, maximum compatibility',          engine:'canvas'},
+        {ext:'jpg',  mime:'image/jpeg', label:'Convert to JPEG', desc:'Widely supported, smaller size',           engine:'canvas'},
+        {ext:'gif',  mime:'image/gif',  label:'Convert to GIF',  desc:'Indexed colour output',                    engine:'canvas'},
+    ],
+    'image/gif': [
+        {ext:'png',  mime:'image/png',  label:'Convert to PNG',  desc:'Lossless, better quality',                 engine:'canvas'},
+        {ext:'jpg',  mime:'image/jpeg', label:'Convert to JPEG', desc:'Smaller file, no transparency',            engine:'canvas'},
+        {ext:'webp', mime:'image/webp', label:'Convert to WebP', desc:'Modern format, compact',                   engine:'canvas'},
+    ],
+    'image/bmp': [
+        {ext:'png',  mime:'image/png',  label:'Convert to PNG',  desc:'Lossless, much smaller file',              engine:'canvas'},
+        {ext:'jpg',  mime:'image/jpeg', label:'Convert to JPEG', desc:'Compressed, widely supported',             engine:'canvas'},
+        {ext:'webp', mime:'image/webp', label:'Convert to WebP', desc:'Modern format, smallest output',           engine:'canvas'},
+    ],
+    'image/tiff': [
+        {ext:'png',  mime:'image/png',  label:'Convert to PNG',  desc:'Lossless, universal support',              engine:'canvas'},
+        {ext:'jpg',  mime:'image/jpeg', label:'Convert to JPEG', desc:'Compressed, smaller file',                 engine:'canvas'},
+    ],
+    /* ── Audio ── */
+    'audio/mpeg': [
+        {ext:'wav',  mime:'audio/wav',  label:'Convert to WAV',  desc:'Uncompressed PCM, lossless',               engine:'audio'},
+        {ext:'mp3',  mime:'audio/mpeg', label:'Re-encode MP3',   desc:'Normalise or adjust quality',              engine:'ffmpeg', ffArgs:['-c:a','libmp3lame','-q:a','2']},
+        {ext:'aac',  mime:'audio/aac',  label:'Convert to AAC',  desc:'Modern codec, great quality at low bitrate',engine:'ffmpeg', ffArgs:['-c:a','aac','-b:a','192k']},
+        {ext:'ogg',  mime:'audio/ogg',  label:'Convert to OGG',  desc:'Open format, good compression',            engine:'ffmpeg', ffArgs:['-c:a','libvorbis','-q:a','4']},
+        {ext:'flac', mime:'audio/flac', label:'Convert to FLAC', desc:'Lossless compressed audio',                engine:'ffmpeg', ffArgs:['-c:a','flac']},
+    ],
+    'audio/wav': [
+        {ext:'mp3',  mime:'audio/mpeg', label:'Convert to MP3',  desc:'Compressed, universal compatibility',      engine:'ffmpeg', ffArgs:['-c:a','libmp3lame','-q:a','2']},
+        {ext:'aac',  mime:'audio/aac',  label:'Convert to AAC',  desc:'Modern codec, efficient compression',      engine:'ffmpeg', ffArgs:['-c:a','aac','-b:a','192k']},
+        {ext:'ogg',  mime:'audio/ogg',  label:'Convert to OGG',  desc:'Open format, good compression',            engine:'ffmpeg', ffArgs:['-c:a','libvorbis','-q:a','4']},
+        {ext:'flac', mime:'audio/flac', label:'Convert to FLAC', desc:'Lossless compressed audio',                engine:'ffmpeg', ffArgs:['-c:a','flac']},
+    ],
+    'audio/ogg': [
+        {ext:'mp3',  mime:'audio/mpeg', label:'Convert to MP3',  desc:'Compressed, widely supported',             engine:'ffmpeg', ffArgs:['-c:a','libmp3lame','-q:a','2']},
+        {ext:'wav',  mime:'audio/wav',  label:'Convert to WAV',  desc:'Uncompressed, lossless',                   engine:'audio'},
+        {ext:'aac',  mime:'audio/aac',  label:'Convert to AAC',  desc:'Efficient modern codec',                   engine:'ffmpeg', ffArgs:['-c:a','aac','-b:a','192k']},
+        {ext:'flac', mime:'audio/flac', label:'Convert to FLAC', desc:'Lossless compressed audio',                engine:'ffmpeg', ffArgs:['-c:a','flac']},
+    ],
+    'audio/aac': [
+        {ext:'mp3',  mime:'audio/mpeg', label:'Convert to MP3',  desc:'Universal compatibility',                  engine:'ffmpeg', ffArgs:['-c:a','libmp3lame','-q:a','2']},
+        {ext:'wav',  mime:'audio/wav',  label:'Convert to WAV',  desc:'Uncompressed, lossless',                   engine:'audio'},
+        {ext:'ogg',  mime:'audio/ogg',  label:'Convert to OGG',  desc:'Open format, good compression',            engine:'ffmpeg', ffArgs:['-c:a','libvorbis','-q:a','4']},
+        {ext:'flac', mime:'audio/flac', label:'Convert to FLAC', desc:'Lossless compressed audio',                engine:'ffmpeg', ffArgs:['-c:a','flac']},
+    ],
+    'audio/flac': [
+        {ext:'mp3',  mime:'audio/mpeg', label:'Convert to MP3',  desc:'Compressed, universal compatibility',      engine:'ffmpeg', ffArgs:['-c:a','libmp3lame','-q:a','2']},
+        {ext:'wav',  mime:'audio/wav',  label:'Convert to WAV',  desc:'Uncompressed PCM',                         engine:'audio'},
+        {ext:'aac',  mime:'audio/aac',  label:'Convert to AAC',  desc:'Modern codec, efficient compression',      engine:'ffmpeg', ffArgs:['-c:a','aac','-b:a','192k']},
+        {ext:'ogg',  mime:'audio/ogg',  label:'Convert to OGG',  desc:'Open format, good compression',            engine:'ffmpeg', ffArgs:['-c:a','libvorbis','-q:a','4']},
+    ],
+    /* ── Video ── */
+    'video/mp4': [
+        {ext:'mp3',  mime:'audio/mpeg', label:'Extract audio → MP3', desc:'Rip audio track, discard video',       engine:'ffmpeg', ffArgs:['-vn','-c:a','libmp3lame','-q:a','2']},
+        {ext:'wav',  mime:'audio/wav',  label:'Extract audio → WAV', desc:'Rip audio track as lossless PCM',      engine:'ffmpeg', ffArgs:['-vn','-c:a','pcm_s16le']},
+        {ext:'aac',  mime:'audio/aac',  label:'Extract audio → AAC', desc:'Rip audio track, efficient codec',     engine:'ffmpeg', ffArgs:['-vn','-c:a','aac','-b:a','192k']},
+        {ext:'webm', mime:'video/webm', label:'Convert to WebM',     desc:'Open format, good browser support',    engine:'ffmpeg', ffArgs:['-c:v','libvpx-vp9','-crf','33','-b:v','0','-c:a','libvorbis']},
+        {ext:'mov',  mime:'video/quicktime', label:'Convert to MOV', desc:'Apple QuickTime format',               engine:'ffmpeg', ffArgs:['-c:v','copy','-c:a','copy']},
+        {ext:'gif',  mime:'image/gif',  label:'Convert to GIF',      desc:'Animated GIF, no audio (first 10s)',   engine:'ffmpeg', ffArgs:['-t','10','-vf','fps=10,scale=480:-1:flags=lanczos','-loop','0']},
+    ],
+    'video/quicktime': [
+        {ext:'mp4',  mime:'video/mp4',  label:'Convert to MP4',      desc:'Universal format, H.264 video',        engine:'ffmpeg', ffArgs:['-c:v','libx264','-preset','fast','-crf','23','-c:a','aac']},
+        {ext:'mp3',  mime:'audio/mpeg', label:'Extract audio → MP3', desc:'Rip audio track, discard video',       engine:'ffmpeg', ffArgs:['-vn','-c:a','libmp3lame','-q:a','2']},
+        {ext:'wav',  mime:'audio/wav',  label:'Extract audio → WAV', desc:'Rip audio track as lossless PCM',      engine:'ffmpeg', ffArgs:['-vn','-c:a','pcm_s16le']},
+        {ext:'webm', mime:'video/webm', label:'Convert to WebM',     desc:'Open format, good browser support',    engine:'ffmpeg', ffArgs:['-c:v','libvpx-vp9','-crf','33','-b:v','0','-c:a','libvorbis']},
+        {ext:'gif',  mime:'image/gif',  label:'Convert to GIF',      desc:'Animated GIF, no audio (first 10s)',   engine:'ffmpeg', ffArgs:['-t','10','-vf','fps=10,scale=480:-1:flags=lanczos','-loop','0']},
+    ],
+    'video/webm': [
+        {ext:'mp4',  mime:'video/mp4',  label:'Convert to MP4',      desc:'Universal format, H.264 video',        engine:'ffmpeg', ffArgs:['-c:v','libx264','-preset','fast','-crf','23','-c:a','aac']},
+        {ext:'mp3',  mime:'audio/mpeg', label:'Extract audio → MP3', desc:'Rip audio track, discard video',       engine:'ffmpeg', ffArgs:['-vn','-c:a','libmp3lame','-q:a','2']},
+        {ext:'wav',  mime:'audio/wav',  label:'Extract audio → WAV', desc:'Rip audio track as lossless PCM',      engine:'ffmpeg', ffArgs:['-vn','-c:a','pcm_s16le']},
+        {ext:'mov',  mime:'video/quicktime', label:'Convert to MOV', desc:'Apple QuickTime format',               engine:'ffmpeg', ffArgs:['-c:v','libx264','-preset','fast','-crf','23','-c:a','aac']},
+        {ext:'gif',  mime:'image/gif',  label:'Convert to GIF',      desc:'Animated GIF, no audio (first 10s)',   engine:'ffmpeg', ffArgs:['-t','10','-vf','fps=10,scale=480:-1:flags=lanczos','-loop','0']},
+    ],
+    'video/x-matroska': [
+        {ext:'mp4',  mime:'video/mp4',  label:'Convert to MP4',      desc:'Universal format, H.264 video',        engine:'ffmpeg', ffArgs:['-c:v','libx264','-preset','fast','-crf','23','-c:a','aac']},
+        {ext:'mp3',  mime:'audio/mpeg', label:'Extract audio → MP3', desc:'Rip audio track, discard video',       engine:'ffmpeg', ffArgs:['-vn','-c:a','libmp3lame','-q:a','2']},
+        {ext:'wav',  mime:'audio/wav',  label:'Extract audio → WAV', desc:'Rip audio track as lossless PCM',      engine:'ffmpeg', ffArgs:['-vn','-c:a','pcm_s16le']},
+    ],
+    'video/x-msvideo': [ // AVI
+        {ext:'mp4',  mime:'video/mp4',  label:'Convert to MP4',      desc:'Universal format, H.264 video',        engine:'ffmpeg', ffArgs:['-c:v','libx264','-preset','fast','-crf','23','-c:a','aac']},
+        {ext:'mp3',  mime:'audio/mpeg', label:'Extract audio → MP3', desc:'Rip audio track, discard video',       engine:'ffmpeg', ffArgs:['-vn','-c:a','libmp3lame','-q:a','2']},
+        {ext:'webm', mime:'video/webm', label:'Convert to WebM',     desc:'Open format, good browser support',    engine:'ffmpeg', ffArgs:['-c:v','libvpx-vp9','-crf','33','-b:v','0','-c:a','libvorbis']},
+    ],
+};
+
+// Also accept by extension for browsers that return blank MIME for video
+const EXT_MIME = {
+    mp4:'video/mp4', mov:'video/quicktime', webm:'video/webm',
+    mkv:'video/x-matroska', avi:'video/x-msvideo',
+    mp3:'audio/mpeg', wav:'audio/wav', ogg:'audio/ogg', aac:'audio/aac', flac:'audio/flac',
+    png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', webp:'image/webp',
+    gif:'image/gif', bmp:'image/bmp', tiff:'image/tiff',
+};
+
+function resolveType(file) {
+    if (file.type && CONV_MAP[file.type]) return file.type;
+    const ext = file.name.split('.').pop().toLowerCase();
+    return EXT_MIME[ext] || file.type;
+}
+
+/* ── FFmpeg.wasm loader ── */
+let ffmpegInstance = null;
+let ffmpegLoading  = false;
+
+async function getFFmpeg() {
+    if (ffmpegInstance) return ffmpegInstance;
+    if (ffmpegLoading)  return new Promise(r => { const t = setInterval(() => { if(ffmpegInstance){clearInterval(t);r(ffmpegInstance);} }, 100); });
+    ffmpegLoading = true;
+    setConvStatus('Loading FFmpeg engine… (first use only, ~30 MB)');
+
+    // Use the single-threaded build which works without SharedArrayBuffer / COOP headers
+    const { FFmpeg } = await import('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');
+    const { fetchFile, toBlobURL } = await import('https://unpkg.com/@ffmpeg/util@0.12.1/dist/esm/index.js');
+
+    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+    const ff = new FFmpeg();
+
+    ff.on('log', ({ message }) => {
+        // Pull time progress out of ffmpeg log lines
+        const m = message.match(/time=(\d+:\d+:\d+)/);
+        if (m) setConvStatus('Converting… ' + m[1]);
     });
 
-    document.getElementById('dlDecFile').addEventListener('click', () => { if (bDecFile) download(bDecFile, nDecName); });
-
-    // ── Password generator ──────────────────────────
-    document.getElementById('btnRunPwd').addEventListener('click', function () {
-        const length = Math.min(128, Math.max(6, parseInt(document.getElementById('pwdLength').value) || 20));
-        let pool = '';
-        if (document.getElementById('chkUpper').checked) pool += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        if (document.getElementById('chkLower').checked) pool += 'abcdefghijklmnopqrstuvwxyz';
-        if (document.getElementById('chkNum').checked)   pool += '0123456789';
-        if (document.getElementById('chkSym').checked)   pool += '!@#$%^&*()-_=+[{]};:,.<>/?';
-        if (!pool) return alert('Select at least one character set.');
-
-        // Rejection sampling — eliminates modulo bias
-        const maxUsable = Math.floor(0x100000000 / pool.length) * pool.length;
-        let pwd = '', buf = new Uint32Array(length * 3), bi = 0;
-        window.crypto.getRandomValues(buf);
-        while (pwd.length < length) {
-            if (bi >= buf.length) { window.crypto.getRandomValues(buf); bi = 0; }
-            if (buf[bi] < maxUsable) pwd += pool[buf[bi] % pool.length];
-            bi++;
-        }
-
-        show('pwdOutputZone');
-        scramble(document.getElementById('pwdOutput'), pwd, false);
-        updateStrength(pwd, pool);
+    await ff.load({
+        coreURL:   await toBlobURL(`${baseURL}/ffmpeg-core.js`,   'text/javascript'),
+        wasmURL:   await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
     });
 
-    function updateStrength(pwd, pool) {
-        // Entropy = length * log2(pool size)
-        const bits = Math.round(pwd.length * Math.log2(pool.length));
-        const fill  = document.getElementById('strengthFill');
-        const label = document.getElementById('strengthLabel');
-        let pct, colour, text;
-        if (bits < 40)      { pct = 15;  colour = '#ff4d4d'; text = 'Weak';   }
-        else if (bits < 60) { pct = 35;  colour = '#ff9f0a'; text = 'Fair';   }
-        else if (bits < 80) { pct = 60;  colour = '#ffd60a'; text = 'Good';   }
-        else if (bits < 100){ pct = 80;  colour = '#30d158'; text = 'Strong'; }
-        else                { pct = 100; colour = '#00e5a0'; text = 'Max';    }
-        fill.style.width      = pct + '%';
-        fill.style.background = colour;
-        label.textContent     = text + ' · ' + bits + ' bits';
-        label.style.color     = colour;
+    // Attach fetchFile helper to instance for convenience
+    ff._fetchFile = fetchFile;
+    ffmpegInstance = ff;
+    ffmpegLoading  = false;
+    setConvStatus('');
+    return ff;
+}
+
+/* ── Status helper ── */
+function setConvStatus(msg) {
+    const el = document.getElementById('convStatus');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.display = msg ? 'block' : 'none';
+}
+
+/* ── State ── */
+let convFile = null, selectedConv = null;
+
+function onConvFileChange() {
+    const input = document.getElementById('convFile');
+    const f = input.files[0];
+    if (!f) return;
+    convFile = f; selectedConv = null;
+
+    const meta = document.getElementById('convFileMeta');
+    meta.textContent = f.name + ' · ' + fmtSize(f.size);
+    meta.style.display = 'block';
+    document.getElementById('convFileZone').classList.add('has-file');
+    document.getElementById('convZoneLabel').textContent = 'Tap to change file';
+
+    hide('convOutput');
+    setConvStatus('');
+    document.getElementById('convUnsupported').style.display = 'none';
+    document.getElementById('btnConvert').style.display = 'none';
+    document.getElementById('btnConvert').disabled = true;
+
+    const type = resolveType(f);
+    const opts = CONV_MAP[type] || [];
+    const wrap = document.getElementById('convOptionsWrap');
+    const grid = document.getElementById('convGrid');
+    grid.innerHTML = '';
+
+    if (!opts.length) {
+        wrap.style.display = 'none';
+        document.getElementById('convUnsupported').style.display = 'block';
+        return;
     }
 
+    wrap.style.display = 'block';
+    opts.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'conv-opt';
+        btn.innerHTML = `<span class="conv-opt-title">${opt.label}</span><span class="conv-opt-desc">${opt.desc}</span>`;
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.conv-opt').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedConv = opt;
+            const cb = document.getElementById('btnConvert');
+            cb.style.display = '';
+            cb.disabled = false;
+        });
+        grid.appendChild(btn);
+    });
+}
+
+async function runConvert() {
+    if (!convFile || !selectedConv) return;
+    const btn = document.getElementById('btnConvert');
+    btn.textContent = 'Converting…'; btn.disabled = true;
+    hide('convOutput');
+
+    try {
+        const srcType = resolveType(convFile);
+        const outName = convFile.name.replace(/\.[^.]+$/, '') + '.' + selectedConv.ext;
+        let outBlob;
+
+        if (selectedConv.engine === 'canvas') {
+            setConvStatus('Converting image…');
+            outBlob = await convertImage(convFile, selectedConv.mime);
+        } else if (selectedConv.engine === 'audio') {
+            setConvStatus('Decoding audio…');
+            outBlob = await convertAudioToWav(convFile);
+        } else {
+            // FFmpeg path — covers all video, most audio
+            const ff = await getFFmpeg();
+            setConvStatus('Reading file…');
+
+            const inExt  = convFile.name.split('.').pop().toLowerCase();
+            const inName  = 'input.' + inExt;
+            const outNameFF = 'output.' + selectedConv.ext;
+
+            await ff.writeFile(inName, await ff._fetchFile(convFile));
+            setConvStatus('Converting…');
+
+            const args = ['-i', inName, ...selectedConv.ffArgs, outNameFF];
+            await ff.exec(args);
+
+            const data = await ff.readFile(outNameFF);
+            outBlob = new Blob([data.buffer], { type: selectedConv.mime });
+
+            // Clean up ffmpeg virtual FS
+            try { await ff.deleteFile(inName); } catch(_) {}
+            try { await ff.deleteFile(outNameFF); } catch(_) {}
+        }
+
+        setConvStatus('');
+        storeBlob('bConvFile', outBlob);
+        storeBlob('nConvFile', outName);
+        document.getElementById('dlConvLabel').textContent = 'Download ' + outName;
+        document.getElementById('dlConvFile').onclick = () => dlBlob('bConvFile','nConvFile','');
+        show('convOutput');
+
+    } catch(e) {
+        setConvStatus('');
+        alert('Conversion failed: ' + e.message);
+    } finally {
+        btn.textContent = 'Convert'; btn.disabled = false;
+    }
+}
+
+/* ── Image via Canvas ── */
+function convertImage(file, targetMime) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            if (targetMime === 'image/jpeg') {
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            ctx.drawImage(img, 0, 0);
+            URL.revokeObjectURL(url);
+            canvas.toBlob(blob => {
+                if (!blob) { reject(new Error('Canvas conversion failed.')); return; }
+                resolve(blob);
+            }, targetMime, 0.92);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not decode image.')); };
+        img.src = url;
+    });
+}
+
+/* ── Audio → WAV (Web Audio API, no deps) ── */
+async function convertAudioToWav(file) {
+    const arrayBuf = await file.arrayBuffer();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const audioBuf = await audioCtx.decodeAudioData(arrayBuf);
+    const channels = audioBuf.numberOfChannels, sr = audioBuf.sampleRate, len = audioBuf.length;
+    const dataSize = len * channels * 2;
+    const buf = new ArrayBuffer(44 + dataSize);
+    const view = new DataView(buf);
+    const ws = (off, str) => { for(let i=0;i<str.length;i++) view.setUint8(off+i, str.charCodeAt(i)); };
+    ws(0,'RIFF'); view.setUint32(4,36+dataSize,true);
+    ws(8,'WAVE'); ws(12,'fmt ');
+    view.setUint32(16,16,true); view.setUint16(20,1,true);
+    view.setUint16(22,channels,true); view.setUint32(24,sr,true);
+    view.setUint32(28,sr*channels*2,true); view.setUint16(32,channels*2,true);
+    view.setUint16(34,16,true); ws(36,'data'); view.setUint32(40,dataSize,true);
+    let off=44;
+    for (let i=0;i<len;i++) for (let ch=0;ch<channels;ch++) {
+        const s = Math.max(-1,Math.min(1,audioBuf.getChannelData(ch)[i]));
+        view.setInt16(off, s<0?s*0x8000:s*0x7FFF, true); off+=2;
+    }
+    return new Blob([buf], {type:'audio/wav'});
+}
+
+function resetConv() {
+    convFile = null; selectedConv = null;
+    document.getElementById('convFile').value = '';
+    document.getElementById('convFileMeta').style.display = 'none';
+    document.getElementById('convFileMeta').textContent = '';
+    document.getElementById('convZoneLabel').textContent = 'Tap to select a file';
+    document.getElementById('convFileZone').classList.remove('has-file');
+    document.getElementById('convGrid').innerHTML = '';
+    document.getElementById('convOptionsWrap').style.display = 'none';
+    document.getElementById('convUnsupported').style.display = 'none';
+    document.getElementById('btnConvert').style.display = 'none';
+    document.getElementById('btnConvert').disabled = true;
+    setConvStatus('');
+    hide('convOutput');
+}
+
+// Expose functions called from inline HTML onclick attributes
+// (module scripts are scoped — must explicitly assign to window)
+Object.assign(window, {
+    nav, switchTab, toggleEncMode, toggleDecMode,
+    copyFrom, pasteInto, dlBlob,
+    runEncrypt, runDecrypt, runPwd,
+    onConvFileChange, runConvert, resetConv,
 });
 </script>
 </body>
