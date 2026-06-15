@@ -4,629 +4,851 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Absolute Privacy Suite</title>
-
-    <meta name="description" content="A secure, mathematical privacy tool for private messages. Mathematical encryption, absolute secrecy, zero data logs.">
-    
+    <meta name="description" content="AES-256-GCM encryption running entirely in your browser. Zero network calls. Zero dependencies.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://hughes2604.github.io/">
     <meta property="og:title" content="Absolute Privacy Suite">
-    <meta property="og:description" content="Secure your private communications with mathematical, unbreakable encryption. Absolute secrecy with zero data footprints.">
+    <meta property="og:description" content="AES-256-GCM encryption. Zero network calls. Runs entirely in your browser.">
     <meta property="og:image" content="https://hughes2604.github.io/Absolute-Privacy-Suite-GitHub.io/og-image.png">
-
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://hughes2604.github.io/">
     <meta name="twitter:title" content="Absolute Privacy Suite">
-    <meta name="twitter:description" content="Secure your private communications with mathematical, unbreakable encryption. Absolute secrecy with zero data footprints.">
+    <meta name="twitter:description" content="AES-256-GCM encryption. Zero network calls. Runs entirely in your browser.">
     <meta name="twitter:image" content="https://hughes2604.github.io/Absolute-Privacy-Suite-GitHub.io/og-image.png">
-    
+    <!-- Fonts as <link> so they load before paint; graceful fallback when offline -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #0b0d0f;
+            --surface:   #111418;
+            --surface2:  #161b21;
+            --border:    #1c2128;
+            --border-hi: #272e38;
+            --accent:    #00e5a0;
+            --accent-hi: #00ffb3;
+            --muted:     #505968;
+            --text:      #bcc5d0;
+            --text-hi:   #e2eaf3;
+            --mono: 'JetBrains Mono', 'Fira Mono', 'Consolas', monospace;
+            --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        /* Force dark bg everywhere including iOS overscroll bounce area */
+        html, body {
+            background: var(--bg);
+            min-height: 100%;
+        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #f5f5f7;
-            color: #1d1d1f;
-            padding: 20px;
-            margin: 0;
+            font-family: var(--sans);
+            color: var(--text);
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px 56px;
+            -webkit-text-size-adjust: 100%;
         }
-        .container {
+
+        /* ── Header ─────────────────────────────── */
+        header {
             width: 100%;
-            max-width: 480px;
-            background: #ffffff;
-            padding: 24px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            box-sizing: border-box;
+            max-width: 500px;
+            padding: 28px 0 24px;
+            text-align: center;
         }
-        /* iOS Segmented Navigation Slider */
-        .nav-toggle {
+        .wordmark {
+            font-family: var(--mono);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 14px;
+            display: block;
+        }
+        .hero-title {
+            font-family: var(--sans);
+            font-size: 28px;
+            font-weight: 700;
+            color: #e2eaf3;      /* hardcoded fallback in case var() fails on old WebKit */
+            color: var(--text-hi);
+            letter-spacing: -0.5px;
+            line-height: 1.15;
+            margin-bottom: 10px;
+        }
+        .hero-sub {
+            font-size: 13.5px;
+            color: #505968;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+        .badge-row {
             display: flex;
-            background: #e8e8ed;
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 24px;
+            gap: 7px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 16px;
         }
-        .nav-btn {
-            flex: 1;
+        .badge {
+            font-family: var(--mono);
+            font-size: 9.5px;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            padding: 4px 9px;
+            border-radius: 5px;
+            border: 1px solid var(--border-hi);
+            color: var(--muted);
+            background: var(--surface);
+        }
+
+        /* ── Card ───────────────────────────────── */
+        .card {
+            width: 100%;
+            max-width: 500px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        /* ── Tab strip ──────────────────────────── */
+        .tab-strip {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface2);
+        }
+        .tab-btn {
             background: none;
             border: none;
-            padding: 10px;
-            font-size: 14px;
+            border-bottom: 2px solid transparent;
+            padding: 15px 0 13px;
+            font-family: var(--sans);
+            font-size: 13px;
             font-weight: 600;
-            color: #515154;
+            color: var(--muted);
             cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.2s ease;
+            transition: color 0.15s, border-color 0.15s;
+            -webkit-tap-highlight-color: transparent;
         }
-        .nav-btn.active {
-            background: #ffffff;
-            color: #0071e3;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            background: var(--surface);
         }
-        .panel {
-            display: none;
-        }
-        .panel.active {
+
+        /* ── Panels ─────────────────────────────── */
+        .panel { display: none; padding: 22px; }
+        .panel.active { display: block; }
+
+        /* ── Field labels ───────────────────────── */
+        .field { margin-bottom: 14px; }
+        .fl {
             display: block;
-        }
-        .label {
-            font-size: 14px;
+            font-size: 10.5px;
             font-weight: 600;
-            margin: 14px 0 6px 0;
-            display: block;
-            color: #1d1d1f;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
         }
-        textarea, input[type="text"], input[type="number"], select {
+
+        /* ── Inputs / textareas / selects ───────── */
+        textarea,
+        input[type="text"],
+        input[type="number"],
+        select {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #d2d2d7;
-            border-radius: 10px;
-            font-family: SFMono-Regular, Consolas, Monaco, monospace;
-            font-size: 14px;
-            box-sizing: border-box;
-            background-color: #fafafa;
+            padding: 10px 12px;
+            background: var(--bg);
+            border: 1px solid var(--border-hi);
+            border-radius: 8px;
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--text-hi);
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            -webkit-appearance: none;
+            appearance: none;
         }
-        textarea { height: 85px; resize: vertical; }
+        textarea { height: 78px; resize: vertical; line-height: 1.5; }
+        textarea::placeholder, input::placeholder { color: var(--muted); opacity: 0.55; font-style: italic; }
         textarea:focus, input:focus, select:focus {
-            outline: none; border-color: #0071e3; background-color: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0,229,160,0.08);
         }
-        /* Action buttons below text areas */
-        .action-bar {
-            display: flex;
-            gap: 8px;
-            margin-top: 6px;
-            margin-bottom: 12px;
-        }
-        .action-btn {
-            flex: 1;
-            background: #f2f2f7;
-            border: none;
-            padding: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #0071e3;
-            border-radius: 6px;
+        input[type="number"] { font-family: var(--mono); }
+
+        /* Custom select arrow */
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%23505968'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 13px center;
+            padding-right: 34px;
             cursor: pointer;
+            color: var(--text);
         }
-        .action-btn:active { background: #e5e5ea; }
-        
-        .file-box {
-            border: 2px dashed #d2d2d7;
-            padding: 16px;
-            border-radius: 10px;
+        select option { background: #1a1f27; color: var(--text-hi); }
+
+        /* ── Output textareas (readonly) ─────────── */
+        textarea[readonly], input[readonly] {
+            color: var(--accent);
+            border-color: var(--border);
+            background: rgba(0,229,160,0.03);
+            cursor: default;
+            font-size: 12px;
+        }
+
+        /* ── File drop zone ─────────────────────── */
+        .file-zone {
+            border: 1px dashed var(--border-hi);
+            border-radius: 8px;
+            padding: 20px 12px;
             text-align: center;
-            background: #fafafa;
-            margin-bottom: 12px;
+            background: var(--bg);
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+            position: relative;
+            overflow: hidden;
         }
-        .btn {
+        .file-zone:hover { border-color: var(--accent); background: rgba(0,229,160,0.03); }
+        .file-zone input[type="file"] {
+            position: absolute; inset: 0; opacity: 0;
+            cursor: pointer; width: 100%; height: 100%;
+            border: none; background: none; padding: 0;
+        }
+        .fz-icon { font-size: 22px; display: block; margin-bottom: 5px; }
+        .fz-label { font-size: 12px; color: var(--muted); font-family: var(--sans); }
+        .fz-name { font-size: 11px; color: var(--accent); margin-top: 4px; font-family: var(--mono); display: none; }
+
+        /* ── Small utility buttons (Copy / Paste / Clear) */
+        .strip {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+        .ub {
+            background: none;
+            border: 1px solid var(--border-hi);
+            border-radius: 5px;
+            padding: 5px 11px;
+            font-family: var(--sans);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: pointer;
+            transition: color 0.12s, border-color 0.12s;
+            -webkit-tap-highlight-color: transparent;
+            letter-spacing: 0.03em;
+        }
+        .ub:hover { color: var(--text-hi); border-color: var(--text); }
+        .ub.copied { color: var(--accent); border-color: var(--accent); }
+
+        /* ── Primary action button ───────────────── */
+        .run-btn {
             width: 100%;
             padding: 14px;
-            font-size: 16px;
-            font-weight: 600;
+            margin-top: 8px;
+            background: var(--accent);
+            color: #05110d;
             border: none;
-            border-radius: 10px;
+            border-radius: 9px;
+            font-family: var(--sans);
+            font-size: 14px;
+            font-weight: 700;
             cursor: pointer;
-            margin-top: 12px;
-            transition: background 0.2s;
+            letter-spacing: 0.02em;
+            transition: background 0.15s, transform 0.08s;
+            -webkit-tap-highlight-color: transparent;
         }
-        .btn-main { background: #0071e3; color: white; }
-        .btn-main:active { background: #005bb5; }
-        .btn-download { background: #34c759; color: white; margin-top: 8px; }
-        .btn-download:active { background: #28a745; }
-        
-        .download-zone {
-            background: #f2f2f7;
-            padding: 12px;
-            border-radius: 10px;
-            margin-top: 16px;
+        .run-btn:hover { background: var(--accent-hi); }
+        .run-btn:active { transform: scale(0.985); }
+
+        /* ── Output section ─────────────────────── */
+        .out-section {
+            margin-top: 18px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border);
             display: none;
         }
-        /* Checkbox matrix layout */
-        .checkbox-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 14px;
-            background: #f2f2f7;
-            padding: 12px;
-            border-radius: 10px;
+        .out-section.show { display: block; }
+        .out-label {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 5px;
         }
-        .checkbox-label {
+        .out-label + textarea,
+        .out-label + input { margin-bottom: 4px; }
+
+        /* ── Success / download zone ─────────────── */
+        .dl-zone {
+            margin-top: 18px;
+            background: rgba(0,229,160,0.05);
+            border: 1px solid rgba(0,229,160,0.15);
+            border-radius: 10px;
+            padding: 15px;
+            display: none;
+        }
+        .dl-zone.show { display: block; }
+        .dl-zone-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
+            gap: 7px;
         }
-        .checkbox-label input {
-            margin-right: 8px;
-            transform: scale(1.1);
+        .dl-zone-title::before {
+            content: '';
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+            box-shadow: 0 0 6px var(--accent);
+        }
+        .dl-btn {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            width: 100%;
+            padding: 10px 13px;
+            margin-bottom: 7px;
+            background: none;
+            border: 1px solid var(--border-hi);
+            border-radius: 7px;
+            font-family: var(--sans);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+            transition: border-color 0.12s, color 0.12s;
+            text-align: left;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .dl-btn:last-child { margin-bottom: 0; }
+        .dl-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .dl-icon { font-size: 15px; flex-shrink: 0; }
+
+        /* ── Password panel ──────────────────────── */
+        .char-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7px;
+            margin-bottom: 14px;
+        }
+        .char-item {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            background: var(--bg);
+            border: 1px solid var(--border-hi);
+            border-radius: 7px;
+            padding: 9px 11px;
+            cursor: pointer;
+            transition: border-color 0.12s, color 0.12s;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: var(--text);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .char-item:has(input:checked) { border-color: var(--accent); color: var(--accent); }
+        .char-item input[type="checkbox"] {
+            width: 14px; height: 14px;
+            border: none; background: none; padding: 0;
+            accent-color: var(--accent);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .strength-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0 2px;
+            min-height: 18px;
+        }
+        .strength-bar {
+            flex: 1;
+            height: 3px;
+            background: var(--border-hi);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .strength-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s, background 0.3s;
+            width: 0%;
+            background: var(--muted);
+        }
+        .strength-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--muted);
+            min-width: 48px;
+            text-align: right;
+        }
+
+        /* ── Footer ──────────────────────────────── */
+        footer {
+            margin-top: 30px;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--muted);
+            text-align: center;
+            line-height: 2;
+            opacity: 0.6;
+        }
+
+        /* ── Scrollbar ───────────────────────────── */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { transition: none !important; animation: none !important; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="nav-toggle">
-        <button id="tabEnc" class="nav-btn active">Encrypt</button>
-        <button id="tabDec" class="nav-btn">Decrypt</button>
-        <button id="tabPwd" class="nav-btn">PassGen</button>
+<header>
+    <span class="wordmark">Absolute Privacy Suite</span>
+    <h1 class="hero-title">Your data.<br>No one else's.</h1>
+    <p class="hero-sub">AES-256-GCM encryption running entirely in your browser.<br>Zero network calls. Zero dependencies. Zero compromise.</p>
+    <div class="badge-row">
+        <span class="badge">AES-256-GCM</span>
+        <span class="badge">WebCrypto API</span>
+        <span class="badge">100% Local</span>
+        <span class="badge">Tamper Detection</span>
+    </div>
+</header>
+
+<div class="card">
+    <div class="tab-strip">
+        <button id="tabEnc" class="tab-btn active">Encrypt</button>
+        <button id="tabDec" class="tab-btn">Decrypt</button>
+        <button id="tabPwd" class="tab-btn">PassGen</button>
     </div>
 
+    <!-- ── ENCRYPT ── -->
     <div id="encryptPanel" class="panel active">
-        <label class="label">Data Type</label>
-        <select id="encType">
-            <option value="text">Plain Text Message</option>
-            <option value="file">Files</option>
-        </select>
+        <div class="field">
+            <label class="fl" for="encType">Mode</label>
+            <select id="encType">
+                <option value="text">Text message</option>
+                <option value="file">File</option>
+            </select>
+        </div>
 
         <div id="encTextGroup">
-            <label class="label">Secret Message</label>
-            <textarea id="encText" placeholder="Type text to encrypt..."></textarea>
-            <div class="action-bar">
-                <button class="action-btn" id="pasteEncText">Paste From Device</button>
-                <button class="action-btn" id="clearEncText">Clear</button>
+            <div class="field">
+                <label class="fl" for="encText">Plaintext</label>
+                <textarea id="encText" placeholder="Enter the message to encrypt…"></textarea>
+                <div class="strip">
+                    <button class="ub" id="pasteEncText">Paste</button>
+                    <button class="ub" id="clearEncText">Clear</button>
+                </div>
             </div>
         </div>
 
         <div id="encFileGroup" style="display:none;">
-            <label class="label">Select Target File</label>
-            <div class="file-box"><input type="file" id="encFile"></div>
+            <div class="field">
+                <label class="fl">File</label>
+                <div class="file-zone" id="encFileZone">
+                    <span class="fz-icon">🔒</span>
+                    <span class="fz-label">Tap to select a file</span>
+                    <span class="fz-name" id="encFileName"></span>
+                    <input type="file" id="encFile">
+                </div>
+            </div>
         </div>
 
-        <button id="btnRunEncrypt" class="btn btn-main">Run Authenticated (AES-GCM) Encryption</button>
+        <button id="btnRunEncrypt" class="run-btn">Encrypt</button>
 
-        <div id="encTextOutput" style="display:none;">
-            <label class="label">Generated Secret Key (Hex String, 256-bit)</label>
+        <div id="encTextOutput" class="out-section">
+            <span class="out-label">Secret Key — keep this separate from the ciphertext</span>
             <textarea id="encKeyResult" readonly></textarea>
-            <div class="action-bar"><button class="action-btn" id="copyEncKey">Copy Key</button></div>
+            <div class="strip"><button class="ub" id="copyEncKey">Copy key</button></div>
 
-            <label class="label">Encrypted Output (Hex String, Authenticated)</label>
+            <span class="out-label" style="margin-top:14px; display:block;">Ciphertext</span>
             <textarea id="encCipherResult" readonly></textarea>
-            <div class="action-bar"><button class="action-btn" id="copyEncCipher">Copy Cipher Text</button></div>
+            <div class="strip"><button class="ub" id="copyEncCipher">Copy ciphertext</button></div>
         </div>
 
-        <div id="encFileOutput" class="download-zone">
-            <span class="label" style="margin:0 0 8px 0; color:#1d1d1f;">Encryption Complete!</span>
-            <button id="dlEncFile" class="btn btn-download">Download Encrypted File</button>
-            <button id="dlEncKey" class="btn btn-download">Download Key File (.key)</button>
+        <div id="encFileOutput" class="dl-zone">
+            <div class="dl-zone-title">Encryption complete</div>
+            <button id="dlEncFile" class="dl-btn"><span class="dl-icon">⬇</span>Download encrypted file (.enc)</button>
+            <button id="dlEncKey"  class="dl-btn"><span class="dl-icon">🔑</span>Download key file (.key)</button>
         </div>
     </div>
 
+    <!-- ── DECRYPT ── -->
     <div id="decryptPanel" class="panel">
-        <label class="label">Data Type</label>
-        <select id="decType">
-            <option value="text">Cipher Text (Hex String)</option>
-            <option value="file">Files</option>
-        </select>
+        <div class="field">
+            <label class="fl" for="decType">Mode</label>
+            <select id="decType">
+                <option value="text">Hex ciphertext</option>
+                <option value="file">File (.enc + .key)</option>
+            </select>
+        </div>
 
         <div id="decTextGroup">
-            <label class="label">Encrypted Data (Hex String)</label>
-            <textarea id="decCipherInput" placeholder="Paste hex cipher here..."></textarea>
-            <div class="action-bar"><button class="action-btn" id="pasteDecCipher">Paste Cipher</button></div>
-
-            <label class="label">Secret Key (Hex String)</label>
-            <textarea id="decKeyInput" placeholder="Paste matching hex key here..."></textarea>
-            <div class="action-bar"><button class="action-btn" id="pasteDecKey">Paste Key</button></div>
+            <div class="field">
+                <label class="fl" for="decCipherInput">Ciphertext (hex)</label>
+                <textarea id="decCipherInput" placeholder="Paste the encrypted hex string…"></textarea>
+                <div class="strip"><button class="ub" id="pasteDecCipher">Paste</button></div>
+            </div>
+            <div class="field">
+                <label class="fl" for="decKeyInput">Secret Key (hex)</label>
+                <textarea id="decKeyInput" placeholder="Paste the matching key hex string…"></textarea>
+                <div class="strip"><button class="ub" id="pasteDecKey">Paste</button></div>
+            </div>
         </div>
 
         <div id="decFileGroup" style="display:none;">
-            <label class="label">Select Encrypted File</label>
-            <div class="file-box"><input type="file" id="decFile"></div>
-            <label class="label">Select Matching Key File (.key)</label>
-            <div class="file-box"><input type="file" id="decKeyFile"></div>
+            <div class="field">
+                <label class="fl">Encrypted file (.enc)</label>
+                <div class="file-zone">
+                    <span class="fz-icon">🔒</span>
+                    <span class="fz-label">Tap to select .enc file</span>
+                    <input type="file" id="decFile">
+                </div>
+            </div>
+            <div class="field">
+                <label class="fl">Key file (.key)</label>
+                <div class="file-zone">
+                    <span class="fz-icon">🔑</span>
+                    <span class="fz-label">Tap to select .key file</span>
+                    <input type="file" id="decKeyFile">
+                </div>
+            </div>
         </div>
 
-        <button id="btnRunDecrypt" class="btn btn-main">Run Authenticated Decryption</button>
+        <button id="btnRunDecrypt" class="run-btn">Decrypt</button>
 
-        <div id="decTextOutput" style="display:none;">
-            <label class="label">Decrypted Result (Plain Text)</label>
+        <div id="decTextOutput" class="out-section">
+            <span class="out-label">Decrypted message</span>
             <textarea id="decPlainResult" readonly></textarea>
-            <div class="action-bar"><button class="action-btn" id="copyDecPlain">Copy Result</button></div>
+            <div class="strip"><button class="ub" id="copyDecPlain">Copy</button></div>
         </div>
 
-        <div id="decFileOutput" class="download-zone">
-            <span class="label" style="margin:0 0 8px 0; color:#1d1d1f;">Decryption Complete!</span>
-            <button id="dlDecFile" class="btn btn-download">Download Restored File</button>
+        <div id="decFileOutput" class="dl-zone">
+            <div class="dl-zone-title">Decryption complete</div>
+            <button id="dlDecFile" class="dl-btn"><span class="dl-icon">⬇</span>Download restored file</button>
         </div>
     </div>
 
+    <!-- ── PASSGEN ── -->
     <div id="pwdPanel" class="panel">
-        <label class="label">Password Length</label>
-        <input type="number" id="pwdLength" value="16" min="6" max="128">
-
-        <label class="label">Character Parameters</label>
-        <div class="checkbox-grid">
-            <label class="checkbox-label"><input type="checkbox" id="chkUpper" checked>Uppercase (A-Z)</label>
-            <label class="checkbox-label"><input type="checkbox" id="chkLower" checked>Lowercase (a-z)</label>
-            <label class="checkbox-label"><input type="checkbox" id="chkNum" checked>Numbers (0-9)</label>
-            <label class="checkbox-label"><input type="checkbox" id="chkSym" checked>Symbols (!@#$)</label>
+        <div class="field">
+            <label class="fl" for="pwdLength">Length</label>
+            <input type="number" id="pwdLength" value="20" min="6" max="128">
         </div>
 
-        <button id="btnRunPwd" class="btn btn-main">Generate Secure Password</button>
+        <div class="field">
+            <label class="fl">Character sets</label>
+            <div class="char-grid">
+                <label class="char-item"><input type="checkbox" id="chkUpper" checked> A–Z uppercase</label>
+                <label class="char-item"><input type="checkbox" id="chkLower" checked> a–z lowercase</label>
+                <label class="char-item"><input type="checkbox" id="chkNum" checked> 0–9 digits</label>
+                <label class="char-item"><input type="checkbox" id="chkSym" checked> !@#$ symbols</label>
+            </div>
+        </div>
 
-        <label class="label">Generated Output</label>
-        <input type="text" id="pwdOutput" readonly placeholder="Secure key string will appear here...">
-        <div class="action-bar"><button class="action-btn" id="copyPwd">Copy Password</button></div>
+        <button id="btnRunPwd" class="run-btn">Generate password</button>
+
+        <div id="pwdOutputZone" class="out-section">
+            <span class="out-label">Generated password</span>
+            <input type="text" id="pwdOutput" readonly placeholder="Password will appear here…">
+            <div class="strength-row">
+                <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                <span class="strength-label" id="strengthLabel"></span>
+            </div>
+            <div class="strip"><button class="ub" id="copyPwd">Copy</button></div>
+        </div>
     </div>
 </div>
 
+<footer>
+    AES-256-GCM &nbsp;·&nbsp; WebCrypto API &nbsp;·&nbsp; No network requests &nbsp;·&nbsp; No data logged<br>
+    For maximum security, save this file and run it completely offline.
+</footer>
+
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    // Navigation Panel Controller
-    const tabs = [
+document.addEventListener("DOMContentLoaded", function () {
+
+    // ── Tabs ───────────────────────────────────────
+    const TABS = [
         { btn: 'tabEnc', panel: 'encryptPanel' },
         { btn: 'tabDec', panel: 'decryptPanel' },
-        { btn: 'tabPwd', panel: 'pwdPanel' }
+        { btn: 'tabPwd', panel: 'pwdPanel' },
     ];
-
-    tabs.forEach(t => {
-        document.getElementById(t.btn).addEventListener('click', function() {
-            tabs.forEach(item => {
-                document.getElementById(item.panel).classList.remove('active');
-                document.getElementById(item.btn).classList.remove('active');
+    TABS.forEach(t => {
+        document.getElementById(t.btn).addEventListener('click', function () {
+            TABS.forEach(i => {
+                document.getElementById(i.panel).classList.remove('active');
+                document.getElementById(i.btn).classList.remove('active');
             });
             document.getElementById(t.panel).classList.add('active');
             this.classList.add('active');
         });
     });
 
-    // Dropdown Visibility Synchronization
-    document.getElementById('encType').addEventListener('change', function() {
-        document.getElementById('encTextGroup').style.display = this.value === 'text' ? 'block' : 'none';
-        document.getElementById('encFileGroup').style.display = this.value === 'file' ? 'block' : 'none';
-        document.getElementById('encTextOutput').style.display = 'none';
-        document.getElementById('encFileOutput').style.display = 'none';
+    // ── Mode toggles ────────────────────────────────
+    document.getElementById('encType').addEventListener('change', function () {
+        document.getElementById('encTextGroup').style.display  = this.value === 'text' ? '' : 'none';
+        document.getElementById('encFileGroup').style.display  = this.value === 'file' ? '' : 'none';
+        hide('encTextOutput'); hide('encFileOutput');
+    });
+    document.getElementById('decType').addEventListener('change', function () {
+        document.getElementById('decTextGroup').style.display  = this.value === 'text' ? '' : 'none';
+        document.getElementById('decFileGroup').style.display  = this.value === 'file' ? '' : 'none';
+        hide('decTextOutput'); hide('decFileOutput');
     });
 
-    document.getElementById('decType').addEventListener('change', function() {
-        document.getElementById('decTextGroup').style.display = this.value === 'text' ? 'block' : 'none';
-        document.getElementById('decFileGroup').style.display = this.value === 'file' ? 'block' : 'none';
-        document.getElementById('decTextOutput').style.display = 'none';
-        document.getElementById('decFileOutput').style.display = 'none';
+    function show(id) { document.getElementById(id).classList.add('show');    }
+    function hide(id) { document.getElementById(id).classList.remove('show'); }
+
+    // ── File label feedback ─────────────────────────
+    document.getElementById('encFile').addEventListener('change', function () {
+        const el = document.getElementById('encFileName');
+        if (this.files[0]) { el.textContent = this.files[0].name; el.style.display = 'block'; }
     });
 
-    // Native Clipboard Engine Utilities
-    function setupCopy(btnId, sourceId) {
-        document.getElementById(btnId).addEventListener('click', function() {
-            const el = document.getElementById(sourceId);
-            el.select();
-            el.setSelectionRange(0, 99999);
+    // ── Clipboard ───────────────────────────────────
+    function setupCopy(btnId, srcId) {
+        document.getElementById(btnId).addEventListener('click', function () {
+            const el = document.getElementById(srcId);
             navigator.clipboard.writeText(el.value).then(() => {
-                const nativeLabel = this.innerText;
-                this.innerText = "✓ Copied!";
-                setTimeout(() => this.innerText = nativeLabel, 1200);
+                this.textContent = '✓ Copied';
+                this.classList.add('copied');
+                setTimeout(() => {
+                    this.textContent = btnId === 'copyPwd' ? 'Copy' : (btnId === 'copyEncKey' ? 'Copy key' : btnId === 'copyEncCipher' ? 'Copy ciphertext' : 'Copy');
+                    this.classList.remove('copied');
+                }, 1500);
             });
         });
     }
-
-    function setupPaste(btnId, targetId) {
-        document.getElementById(btnId).addEventListener('click', function() {
-            navigator.clipboard.readText().then(text => {
-                document.getElementById(targetId).value = text;
-            }).catch(() => {
-                alert("Please grant clipboard reading permissions or paste manually.");
-            });
+    function setupPaste(btnId, tgtId) {
+        document.getElementById(btnId).addEventListener('click', function () {
+            navigator.clipboard.readText().then(t => {
+                document.getElementById(tgtId).value = t;
+            }).catch(() => alert('Grant clipboard access or paste manually (Ctrl+V / ⌘V).'));
         });
     }
 
-    setupCopy('copyEncKey', 'encKeyResult');
+    setupCopy('copyEncKey',    'encKeyResult');
     setupCopy('copyEncCipher', 'encCipherResult');
-    setupCopy('copyDecPlain', 'decPlainResult');
-    setupCopy('copyPwd', 'pwdOutput');
+    setupCopy('copyDecPlain',  'decPlainResult');
+    setupCopy('copyPwd',       'pwdOutput');
 
-    setupPaste('pasteEncText', 'encText');
+    setupPaste('pasteEncText',   'encText');
     setupPaste('pasteDecCipher', 'decCipherInput');
-    setupPaste('pasteDecKey', 'decKeyInput');
+    setupPaste('pasteDecKey',    'decKeyInput');
 
-    document.getElementById('clearEncText').addEventListener('click', () => { document.getElementById('encText').value = ""; });
+    document.getElementById('clearEncText').addEventListener('click', () => {
+        document.getElementById('encText').value = '';
+    });
 
-    // Conversion Utilities
-    function bytesToHex(bytes) {
-        let hex = [];
-        for (let i = 0; i < bytes.length; i++) hex.push(bytes[i].toString(16).padStart(2, '0'));
-        return hex.join('');
+    // ── Conversion utils ────────────────────────────
+    function bytesToHex(b) {
+        return Array.from(b).map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+    function hexToBytes(h) {
+        if (!h || h.length % 2) throw new Error('Invalid hex string.');
+        return new Uint8Array(h.length / 2).map((_, i) => parseInt(h.slice(i*2, i*2+2), 16));
     }
 
-    function hexToBytes(hex) {
-        if (!hex || hex.length % 2 !== 0) throw new Error("Invalid hex string structure.");
-        let bytes = new Uint8Array(hex.length / 2);
-        for (let c = 0; c < hex.length; c += 2) bytes[c / 2] = parseInt(hex.substring(c, c + 2), 16);
-        return bytes;
-    }
-
-    // NEW: Safe Chunk-Based Random Byte Generator (Bypasses browser 64KB quota limit)
-    function generateSecureRandomBytes(totalSize) {
-        const outputBytes = new Uint8Array(totalSize);
-        const maxSafeChunk = 65536; // Browser API hard-limit boundary
-        
-        for (let offset = 0; offset < totalSize; offset += maxSafeChunk) {
-            const currentChunkSize = Math.min(maxSafeChunk, totalSize - offset);
-            const temporaryBuffer = new Uint8Array(currentChunkSize);
-            
-            window.crypto.getRandomValues(temporaryBuffer);
-            outputBytes.set(temporaryBuffer, offset);
+    // ── Secure random (chunk-based, bypasses 64 KB limit) ──
+    function secureRandom(n) {
+        const out = new Uint8Array(n), chunk = 65536;
+        for (let o = 0; o < n; o += chunk) {
+            const b = new Uint8Array(Math.min(chunk, n - o));
+            window.crypto.getRandomValues(b);
+            out.set(b, o);
         }
-        return outputBytes;
+        return out;
     }
 
-    // High Performance Scramble Animation Engine
-    function animateTextReveal(element, finalValue, isHex = false) {
-        const matrixChars = isHex ? "0123456789abcdef" : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-        let currentFrame = 0;
-        const totalFrames = 12; 
-        const sliceLimit = 250;
-        
-        const runtimeInterval = setInterval(() => {
-            if (currentFrame >= totalFrames) {
-                element.value = finalValue;
-                clearInterval(runtimeInterval);
-            } else {
-                let randomBuffer = "";
-                const dynamicLength = Math.min(finalValue.length, sliceLimit);
-                for (let i = 0; i < dynamicLength; i++) {
-                    randomBuffer += matrixChars[Math.floor(Math.random() * matrixChars.length)];
-                }
-                if (finalValue.length > sliceLimit) randomBuffer += "\n... [Calculations complete; rendering dataset]";
-                element.value = randomBuffer;
-                currentFrame++;
-            }
-        }, 35);
+    // ── Matrix scramble animation ───────────────────
+    function scramble(el, final, isHex = false) {
+        const chars = isHex ? '0123456789abcdef' : 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+        let frame = 0;
+        const FRAMES = 10, LIMIT = 220;
+        const iv = setInterval(() => {
+            if (frame++ >= FRAMES) { el.value = final; clearInterval(iv); return; }
+            const len = Math.min(final.length, LIMIT);
+            let buf = Array.from({length: len}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+            if (final.length > LIMIT) buf += '\n… [full output ready]';
+            el.value = buf;
+        }, 32);
     }
 
-    // Dynamic Blobs Persistent Memory Store
+    // ── Blob store ──────────────────────────────────
     let bEncFile = null, bEncKey = null, bDecFile = null;
-    let nEncName = "", nDecName = "";
+    let nEncName = '', nDecName = '';
 
-    /* --- NATIVE WEBCRYPTO (AES-GCM) IMPLEMENTATION --- */
-    
-    // GCM handles authentication (tamper detection) natively via its internal tag.
-    // The safest method is to generate a unique key and unique nonce (IV) for *every* encryption.
-    // For text, we pack the nonce into the beginning of the hex output.
-
-    async function encryptData(plaintextBytes, keyBytes) {
-        // 1. Generate unique 96-bit (12-byte) nonce/IV for GCM. NATIVE REQUIREMENT.
+    // ── AES-GCM core ────────────────────────────────
+    async function aesEncrypt(plain, key) {
         const nonce = window.crypto.getRandomValues(new Uint8Array(12));
-
-        // 2. Import the raw keyBytes as a proper CryptoKey handle
-        const cryptoKey = await window.crypto.subtle.importKey(
-            "raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt"]
-        );
-
-        // 3. Perform encryption
-        const encryptedBuffer = await window.crypto.subtle.encrypt(
-            { name: "AES-GCM", iv: nonce },
-            cryptoKey,
-            plaintextBytes
-        );
-
-        // 4. Encrypted output includes the 16-byte authentication tag appended by the browser.
-        const encryptedBytes = new Uint8Array(encryptedBuffer);
-
-        // 5. Pack the nonce + encrypted data into one final binary buffer.
-        // This is necessary so the recipient only needs *one* ciphertext string (and the separate key).
-        const finalPackedData = new Uint8Array(nonce.length + encryptedBytes.length);
-        finalPackedData.set(nonce);
-        finalPackedData.set(encryptedBytes, nonce.length);
-
-        return finalPackedData;
+        const ck = await window.crypto.subtle.importKey('raw', key, {name:'AES-GCM'}, false, ['encrypt']);
+        const ct = await window.crypto.subtle.encrypt({name:'AES-GCM', iv: nonce}, ck, plain);
+        const out = new Uint8Array(12 + ct.byteLength);
+        out.set(nonce);
+        out.set(new Uint8Array(ct), 12);
+        return out;
     }
 
-    async function decryptData(packedHex, keyBytes) {
-        const packedBytes = hexToBytes(packedHex);
-        
-        // GCM standard nonce length is 12. If the data is shorter than nonce + minimum possible 1-byte cipher, it's structurally tampered.
-        if (packedBytes.length < 13) throw new Error("Integrity failure: Ciphertext is malformed or truncated.");
-
-        // 1. Unpack data: Extract the first 12 bytes as the nonce
-        const nonce = packedBytes.slice(0, 12);
-        // The remaining bytes are the actual ciphertext-plus-authentication-tag
-        const encryptedData = packedBytes.slice(12);
-
-        // 2. Import key handle for decryption
-        const cryptoKey = await window.crypto.subtle.importKey(
-            "raw", keyBytes, { name: "AES-GCM" }, false, ["decrypt"]
-        );
-
-        // 3. Attempt Decryption. This is the tamper detection step.
-        // window.crypto.subtle.decrypt() will automatically check GCM's built-in authentication tag against the decrypted bytes and throw an exception if they don't match (i.e. if the data has been altered).
+    async function aesDecrypt(hex, key) {
+        const packed = hexToBytes(hex);
+        if (packed.length < 13) throw new Error('Ciphertext is malformed or truncated.');
+        const nonce = packed.slice(0, 12);
+        const ct    = packed.slice(12);
+        const ck = await window.crypto.subtle.importKey('raw', key, {name:'AES-GCM'}, false, ['decrypt']);
         try {
-            const decryptedBuffer = await window.crypto.subtle.decrypt(
-                { name: "AES-GCM", iv: nonce },
-                cryptoKey,
-                encryptedData
-            );
-            return new Uint8Array(decryptedBuffer);
-        } catch(e) {
-            // Throw a explicit, fatal error if the browser reports a structural mismatch.
-            // This error must be handled in the main function.
-            throw new Error("🚨 SECURITY FATAL: The encrypted data has been modified! Decryption aborted due to loss of structural integrity.");
+            const pt = await window.crypto.subtle.decrypt({name:'AES-GCM', iv: nonce}, ck, ct);
+            return new Uint8Array(pt);
+        } catch {
+            throw new Error('🚨 SECURITY ALERT: Integrity check failed. The encrypted data has been altered or the wrong key was used.');
         }
     }
 
-    // 1. ENCRYPTION HANDLER (UPDATED FOR ASYNC CRYPTO)
-    document.getElementById('btnRunEncrypt').addEventListener('click', async function() {
-        const mode = document.getElementById('encType').value;
-        document.getElementById('encTextOutput').style.display = 'none';
-        document.getElementById('encFileOutput').style.display = 'none';
+    // ── iOS-safe download ───────────────────────────
+    function download(blob, name) {
+        const url = URL.createObjectURL(blob);
+        const a = Object.assign(document.createElement('a'), {href: url, download: name});
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 300);
+    }
 
+    // ── Encrypt handler ─────────────────────────────
+    document.getElementById('btnRunEncrypt').addEventListener('click', async function () {
+        const mode = document.getElementById('encType').value;
+        hide('encTextOutput'); hide('encFileOutput');
         try {
             if (mode === 'text') {
-                const text = document.getElementById('encText').value;
-                if (!text) return alert('Please enter text to encrypt.');
-                
-                const plainBytes = new TextEncoder().encode(text);
-                // For optimal security, we generate a random 256-bit (32-byte) key for every text message.
-                const keyBytes = generateSecureRandomBytes(32); 
-                
-                // Pack the data (includes nonce, ciphertext, and GCM auth tag)
-                const finalPackedData = await encryptData(plainBytes, keyBytes);
-
-                const hexKey = bytesToHex(keyBytes);
-                const hexCipher = bytesToHex(finalPackedData);
-
-                document.getElementById('encTextOutput').style.display = 'block';
-                animateTextReveal(document.getElementById('encKeyResult'), hexKey, true);
-                animateTextReveal(document.getElementById('encCipherResult'), hexCipher, true);
+                const txt = document.getElementById('encText').value;
+                if (!txt) return alert('Enter some text to encrypt.');
+                const key    = secureRandom(32);
+                const packed = await aesEncrypt(new TextEncoder().encode(txt), key);
+                show('encTextOutput');
+                scramble(document.getElementById('encKeyResult'),    bytesToHex(key),    true);
+                scramble(document.getElementById('encCipherResult'), bytesToHex(packed), true);
             } else {
-                // FILE MODE (Retains memory limits; refactored for async crypto)
-                const fileInput = document.getElementById('encFile').files[0];
-                if (!fileInput) return alert('Please choose a file to encrypt.');
-
+                const f = document.getElementById('encFile').files[0];
+                if (!f) return alert('Select a file to encrypt.');
                 const reader = new FileReader();
-                reader.onload = async function(e) {
-                    const plainBytes = new Uint8Array(e.target.result);
-                    const keyBytes = generateSecureRandomBytes(32); // Generate unique file key
-
-                    const finalPackedData = await encryptData(plainBytes, keyBytes);
-
-                    // For files, we keep Key and Cipher separate (Key goes in .key file, data goes in .enc file)
-                    // The .enc file structure is: [12 bytes: NONCE] [N bytes: CIPHERTEXT+GCMTAG]
-                    bEncFile = new Blob([finalPackedData], { type: 'application/octet-stream' });
-                    bEncKey = new Blob([keyBytes], { type: 'application/octet-stream' });
-                    nEncName = fileInput.name;
-
-                    document.getElementById('encFileOutput').style.display = 'block';
+                reader.onload = async e => {
+                    const key    = secureRandom(32);
+                    const packed = await aesEncrypt(new Uint8Array(e.target.result), key);
+                    bEncFile = new Blob([packed], {type:'application/octet-stream'});
+                    bEncKey  = new Blob([key],    {type:'application/octet-stream'});
+                    nEncName = f.name;
+                    show('encFileOutput');
                 };
-                reader.readAsArrayBuffer(fileInput);
+                reader.readAsArrayBuffer(f);
             }
-        } catch(e) {
-            alert('An internal error occurred during encryption: ' + e.message);
-        }
+        } catch (e) { alert('Encryption error: ' + e.message); }
     });
 
-    // Document Object Model Appended Download Anchors (Bypasses iOS Sandbox Restrictions)
-    function runSecureiOSDownload(blobData, fileNameString) {
-        const downloadUrl = URL.createObjectURL(blobData);
-        const physicalAnchorNode = document.createElement('a');
-        physicalAnchorNode.href = downloadUrl;
-        physicalAnchorNode.download = fileNameString;
-        
-        document.body.appendChild(physicalAnchorNode);
-        physicalAnchorNode.click();
-        
-        document.body.removeChild(physicalAnchorNode);
-        setTimeout(() => URL.revokeObjectURL(downloadUrl), 200);
-    }
+    document.getElementById('dlEncFile').addEventListener('click', () => { if (bEncFile) download(bEncFile, nEncName + '.enc'); });
+    document.getElementById('dlEncKey') .addEventListener('click', () => { if (bEncKey)  download(bEncKey,  nEncName + '.key'); });
 
-    document.getElementById('dlEncFile').addEventListener('click', () => { if(bEncFile) runSecureiOSDownload(bEncFile, nEncName + '.enc'); });
-    document.getElementById('dlEncKey').addEventListener('click', () => { if(bEncKey) runSecureiOSDownload(bEncKey, nEncName + '.key'); });
-
-    // 2. DECRYPT HANDLER (UPDATED FOR ASYNC CRYPTO AND TAMPER DETECTION)
-    document.getElementById('btnRunDecrypt').addEventListener('click', async function() {
+    // ── Decrypt handler ─────────────────────────────
+    document.getElementById('btnRunDecrypt').addEventListener('click', async function () {
         const mode = document.getElementById('decType').value;
-        document.getElementById('decTextOutput').style.display = 'none';
-        document.getElementById('decFileOutput').style.display = 'none';
-
+        hide('decTextOutput'); hide('decFileOutput');
         if (mode === 'text') {
-            const packedHex = document.getElementById('decCipherInput').value.trim();
+            const hex    = document.getElementById('decCipherInput').value.trim();
             const keyHex = document.getElementById('decKeyInput').value.trim();
-            if (!packedHex || !keyHex) return alert('Please enter both packed cipher and key strings.');
-
+            if (!hex || !keyHex) return alert('Paste both the ciphertext and the key.');
             try {
-                const keyBytes = hexToBytes(keyHex);
-                // Attempt authenticated decryption. This is where tamper detection happens.
-                const decryptedBytes = await decryptData(packedHex, keyBytes);
-
-                const plainString = new TextDecoder().decode(decryptedBytes);
-                document.getElementById('decTextOutput').style.display = 'block';
-                animateTextReveal(document.getElementById('decPlainResult'), plainString, false);
-            } catch(e) { 
-                // CRITICAL TAMPER ALERT: Check the specific error message generated inside decryptData()
-                if (e.message.includes('🚨 SECURITY FATAL')) {
-                    // This means the integrity check failed (data was altered). 
-                    // Tell the user explicitly that it has been tampered with.
-                    alert(e.message); 
-                } else {
-                    // This handles structural failures (e.g., inputting junk hex or the wrong key, which can look like corruption).
-                    alert('Decryption structurally failed. Check key coherence and input strings.\n\nError: ' + e.message);
-                }
-                console.error(e);
+                const pt = await aesDecrypt(hex, hexToBytes(keyHex));
+                show('decTextOutput');
+                scramble(document.getElementById('decPlainResult'), new TextDecoder().decode(pt), false);
+            } catch (e) {
+                alert(e.message);
             }
         } else {
-            // FILE MODE (Retains memory limits; refactored for async crypto and tamper detection)
-            const fileInput = document.getElementById('decFile').files[0];
-            const keyInput = document.getElementById('decKeyFile').files[0];
-            if (!fileInput || !keyInput) return alert('Please load both file targets.');
-
-            const fileReader = new FileReader();
-            fileReader.onload = function(e) {
-                const packedFileBytes = new Uint8Array(e.target.result);
-                const packedHex = bytesToHex(packedFileBytes);
-                
-                const keyReader = new FileReader();
-                keyReader.onload = async function(kEvent) {
-                    const keyBytes = new Uint8Array(kEvent.target.result);
-
+            const fEnc = document.getElementById('decFile').files[0];
+            const fKey = document.getElementById('decKeyFile').files[0];
+            if (!fEnc || !fKey) return alert('Load both the .enc file and the .key file.');
+            const r1 = new FileReader();
+            r1.onload = e1 => {
+                const r2 = new FileReader();
+                r2.onload = async e2 => {
                     try {
-                        // Tamper detection step for files
-                        const decryptedBytes = await decryptData(packedHex, keyBytes);
-
-                        bDecFile = new Blob([decryptedBytes], { type: 'application/octet-stream' });
-                        nDecName = fileInput.name.replace('.enc', '');
-
-                        document.getElementById('decFileOutput').style.display = 'block';
-                    } catch(tamperErr) {
-                        if (tamperErr.message.includes('🚨 SECURITY FATAL')) {
-                            alert(tamperErr.message); 
-                        } else {
-                            alert('Decryption structurally failed. Verify you have loaded the correct, original .enc and .key files. Memory limits might also be a factor.\n\nError: ' + tamperErr.message);
-                        }
-                        console.error(tamperErr);
-                    }
+                        const pt = await aesDecrypt(bytesToHex(new Uint8Array(e1.target.result)), new Uint8Array(e2.target.result));
+                        bDecFile = new Blob([pt], {type:'application/octet-stream'});
+                        nDecName = fEnc.name.replace(/\.enc$/i, '');
+                        show('decFileOutput');
+                    } catch (e) { alert(e.message); }
                 };
-                keyReader.readAsArrayBuffer(keyInput);
+                r2.readAsArrayBuffer(fKey);
             };
-            fileReader.readAsArrayBuffer(fileInput);
+            r1.readAsArrayBuffer(fEnc);
         }
     });
 
-    document.getElementById('dlDecFile').addEventListener('click', () => { if(bDecFile) runSecureiOSDownload(bDecFile, nDecName); });
+    document.getElementById('dlDecFile').addEventListener('click', () => { if (bDecFile) download(bDecFile, nDecName); });
 
-    // 3. ENHANCED PASSWORD GENERATOR (unchanged, mathematically robust)
-    document.getElementById('btnRunPwd').addEventListener('click', function() {
-        const length = parseInt(document.getElementById('pwdLength').value) || 16;
-        
-        let pool = "";
-        if (document.getElementById('chkUpper').checked) pool += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        if (document.getElementById('chkLower').checked) pool += "abcdefghijklmnopqrstuvwxyz";
-        if (document.getElementById('chkNum').checked) pool += "0123456789";
-        if (document.getElementById('chkSym').checked) pool += "!@#$%^&*()-_=+[{]};:,.<>/?";
+    // ── Password generator ──────────────────────────
+    document.getElementById('btnRunPwd').addEventListener('click', function () {
+        const length = Math.min(128, Math.max(6, parseInt(document.getElementById('pwdLength').value) || 20));
+        let pool = '';
+        if (document.getElementById('chkUpper').checked) pool += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        if (document.getElementById('chkLower').checked) pool += 'abcdefghijklmnopqrstuvwxyz';
+        if (document.getElementById('chkNum').checked)   pool += '0123456789';
+        if (document.getElementById('chkSym').checked)   pool += '!@#$%^&*()-_=+[{]};:,.<>/?';
+        if (!pool) return alert('Select at least one character set.');
 
-        if (!pool) return alert('Select at least one set of characters.');
-
-        let targetPassword = "";
-        const systemCryptBuffer = new Uint32Array(length);
-        window.crypto.getRandomValues(systemCryptBuffer);
-
-        for (let i = 0; i < length; i++) {
-            targetPassword += pool[systemCryptBuffer[i] % pool.length];
+        // Rejection sampling — eliminates modulo bias
+        const maxUsable = Math.floor(0x100000000 / pool.length) * pool.length;
+        let pwd = '', buf = new Uint32Array(length * 3), bi = 0;
+        window.crypto.getRandomValues(buf);
+        while (pwd.length < length) {
+            if (bi >= buf.length) { window.crypto.getRandomValues(buf); bi = 0; }
+            if (buf[bi] < maxUsable) pwd += pool[buf[bi] % pool.length];
+            bi++;
         }
 
-        animateTextReveal(document.getElementById('pwdOutput'), targetPassword, false);
+        show('pwdOutputZone');
+        scramble(document.getElementById('pwdOutput'), pwd, false);
+        updateStrength(pwd, pool);
     });
+
+    function updateStrength(pwd, pool) {
+        // Entropy = length * log2(pool size)
+        const bits = Math.round(pwd.length * Math.log2(pool.length));
+        const fill  = document.getElementById('strengthFill');
+        const label = document.getElementById('strengthLabel');
+        let pct, colour, text;
+        if (bits < 40)      { pct = 15;  colour = '#ff4d4d'; text = 'Weak';   }
+        else if (bits < 60) { pct = 35;  colour = '#ff9f0a'; text = 'Fair';   }
+        else if (bits < 80) { pct = 60;  colour = '#ffd60a'; text = 'Good';   }
+        else if (bits < 100){ pct = 80;  colour = '#30d158'; text = 'Strong'; }
+        else                { pct = 100; colour = '#00e5a0'; text = 'Max';    }
+        fill.style.width      = pct + '%';
+        fill.style.background = colour;
+        label.textContent     = text + ' · ' + bits + ' bits';
+        label.style.color     = colour;
+    }
+
 });
 </script>
-
 </body>
 </html>
